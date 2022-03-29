@@ -97,6 +97,33 @@ classdef pr730Class < handle
             spect = SpectrumClass(slocal(:,1),slocal(:,2));
         end
         
+        function ret = mode4x (obj)
+            
+            % send command to take a measurement
+            obj.comPort.send('S')
+            obj.comPort.send('G')
+            obj.comPort.send('3')
+            obj.comPort.send(13)
+            
+            % obtain reading here
+            ret = obj.comPort.get;
+            
+        end
+        
+        %%
+        function ret = mode1x (obj)
+            
+            % send command to take a measurement
+            obj.comPort.send('S')
+            obj.comPort.send('G')
+            obj.comPort.send('0')
+            obj.comPort.send(13)
+            
+            % obtain reading here
+            ret = obj.comPort.get;
+            
+        end
+        
         %% destructor
         % exit remote mode and close RS232
         % because frequently forgot to close PR730 before exiting Matlab
