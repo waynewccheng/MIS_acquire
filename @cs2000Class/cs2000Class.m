@@ -83,7 +83,10 @@ classdef cs2000Class < handle
                 vciey = cell2mat(val(3));
                 vy = cell2mat(val(4));
                 Yxy = [vy vciex vciey];
-                Yxy
+                
+                % show the Yxy?
+                % Yxy
+                %
             end
 
             %% --- obtain spectral measurement data
