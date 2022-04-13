@@ -15,6 +15,9 @@ classdef OL490Class < handle
         asmOLIPlugin
         asmOL490Lib
         asmOL490SDK
+                    
+        % use 40000 for calibration
+        max_column_value = 40000;
     end
     
     methods
@@ -71,23 +74,26 @@ classdef OL490Class < handle
         %%
         function setColumn1024 (obj, A)
             
-            % use 40000 for calibration
-            max_column_value = 40000;
-
             st = zeros(1,1024);
 
             for colno = 1:1024
                 
                 % adjust this value
-                st(1,colno) = max_column_value * A(colno);
+                st(1,colno) = obj.max_column_value * A(colno);
             end
 
             e = obj.m.TurnOnColumn(st);            
         end
         
         %%
+        function setBlack (obj)
+            A = zeros(1024,1);       % 1024x1 double
+            obj.setColumn1024(A);
+        end
+        
+        %%
         function setWhite (obj)
-            load('D65_6363K');
+            load('D65_6363K');       % 1024x1 double
             obj.setColumn1024(A);
         end
         
