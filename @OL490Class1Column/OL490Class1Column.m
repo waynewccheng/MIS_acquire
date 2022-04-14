@@ -157,8 +157,23 @@ classdef OL490Class1Column < handle
                 
             end
         end
-        
-        function measurement_trial_search_x5 (ol,cs)
+
+        function measurement_trial_search_x50_summary
+            % Where is the data file?
+            classpath = which('OL490Class1Column');
+            [filepath,name,ext] = fileparts(classpath);
+
+            col_wl = []
+            for i = 00:1:49
+            
+                datapath = sprintf('%s/%s_%02d.mat',filepath,'peak1col',i);
+                load(datapath);
+            
+                col_wl =
+            end            
+        end
+                
+        function measurement_trial_search_x50 (ol,cs)
             
             % Where is the data file?
             classpath = which('OL490Class1Column');
@@ -168,7 +183,7 @@ classdef OL490Class1Column < handle
             load(datapath,'s_dark');
             
             col_wl_all = [];
-            for i = 00:10:40
+            for i = 00:1:49
                 
                 wl_target = [400+i:50:750];
                 col_wl = OL490Class1Column.measurement_trial_search(ol,cs,wl_target,s_dark);
