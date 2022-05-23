@@ -1,11 +1,11 @@
 classdef OL490Class1Column < handle
-    %UNTITLED2 Summary of this class goes here
+    %OL490Class1Column Find relationship between 1024-column control and ouput spectra of OL490
     %   Detailed explanation goes here
     
     properties
         col_range = [37,49,70,96,124,152,179,202,231,238,301,306,330,355,380,405,432,457,483,505,533,556,583,608,633,658,682,708,734,760,780,810,834,857,886,905,933,956,976,1035,1120]';
-        spec_dark         % all column off (zero)
-        spec_all = zeros(41,401)  % dark removed
+        spec_dark         % when all column are off (zero); needed for finding linearity
+        spec_all = zeros(41,401)  % store final data; dark removed
         wl_target
         wl_measured
     end
@@ -52,10 +52,10 @@ classdef OL490Class1Column < handle
         %
         function [x y] = find_spike (wl_tar, spec)
             
-            % spec is 1x401
+            % spec is 1x401 from OL490 output
             
             %
-            % convert to 780x1
+            % convert to 780x1 as absolute wavelength
             %
             t2 = zeros(780,1);
             t2(380:780,1) = spec';
@@ -74,7 +74,7 @@ classdef OL490Class1Column < handle
             % normalize
             t5 = t4 / max(t4);
             
-            % find the mid point, 50%, by linear search
+            % find the mid point, defined as 50%, by linear search
             i = 1;
             while i <= length(t5) && t5(i) < 0.5
                 i = i + 1;
@@ -113,6 +113,7 @@ classdef OL490Class1Column < handle
         end
         
         function check_measurement_data
+            
             % Where is the data file?
             classpath = which('OL490Class1Column');
             [filepath,name,ext] = fileparts(classpath);
@@ -216,11 +217,12 @@ classdef OL490Class1Column < handle
             col = OL490Class1Column.col2peak_predict(wl_target);
             
             %
-            % iterate
+            % iterate until good results found or max trials
             %
             err = 100;
             i = 1;
-            while i <= 5 && err > 1
+            max_trial = 5;
+            while i <= max_trial && err > 1
                 fprintf('Iteration #%d\n',i)
                 [s wl] = OL490Class1Column.measurement_trial(ol,cs,wl_target,col,s_dark);
                 col = OL490Class1Column.wl_column_interpolate(wl,col,wl_target);
@@ -238,7 +240,9 @@ classdef OL490Class1Column < handle
         end
         
         function col_predict = wl_column_interpolate (wl,col,wl_target)
-
+            %
+            % predict column between 1 and 1024 by the look-up table
+            %
             col_predict = round(interp1(wl,col,wl_target,'spline','extrap'));
             col_predict = min(col_predict,1024);
             col_predict = max(col_predict,1);
@@ -246,6 +250,14 @@ classdef OL490Class1Column < handle
         end
         
         function [s_measured,wl_measured] = measurement_trial (ol,cs,wl_target,col_range,s_dark)
+            %
+            % one trial measurement
+            %   ol: OL490
+            %   cs: spectroradiometer
+            %   wl_target: a list of wavelengths to match
+            %   col_range: a list of column numbers to use
+            %   s_dark: pre-measured dark level
+            %
             
             %
             % prepare the input
@@ -316,7 +328,12 @@ classdef OL490Class1Column < handle
         end
         
         function col = col2peak_predict (wl)
+            %
+            % predict the columns using old measurement data
+            % wl: a list of peaks
+            %
             load('col2peak.mat','col2peak')
+            
             for i = 1:length(wl)
                 wl_target = wl(i);
                 col_predict = round(interp1(col2peak(:,2),col2peak(:,1),wl_target,'spline','extrap'));
@@ -345,9 +362,11 @@ classdef OL490Class1Column < handle
         end
         
         function vout = multiple_peaks (col_range)
-            
+            %
+            % generate a column vector using the column numbers
+            %
             v_max = 1;              % max intensity
-            col_width = 0;          % only one column
+            col_width = 0;          % width: only one column
             
             vout = zeros(1024,1);
             for i = 1:length(col_range)
@@ -359,13 +378,16 @@ classdef OL490Class1Column < handle
         end
         
         function vout = add_a_peak (vin, col, width, amp)
+            %
+            % turn on one more column (+/- width) in the given vector
+            %
             vout = vin;
             
+            col_start = col-width;
+            col_stop = col+width;
             %
             % check range
             %
-            col_start = col-width;
-            col_stop = col+width;
             col_start = max(1,col_start);
             col_stop = min(1024,col_stop);
             
