@@ -33,7 +33,7 @@ classdef OL490Class1Column < handle
                 obj.spec_all(i,:) = mypeakmeasure{i}.amplitude - obj.spec_dark;
             end
             
-            obj.find_peaks;
+            %obj.find_peaks;
             
         end
         
@@ -170,7 +170,7 @@ classdef OL490Class1Column < handle
                 datapath = sprintf('%s/%s_%02d.mat',filepath,'peak1col',i);
                 load(datapath);
             
-                col_wl =
+                % col_wl =
             end            
         end
                 
