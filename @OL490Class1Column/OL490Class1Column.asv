@@ -133,8 +133,12 @@ classdef OL490Class1Column < handle
             k = 1;
 
                         %for wl_offset = 00:10:40
+
+
             for wl_offset = 1
                 
+                col = [400+wl_offset:50:750];
+
                 datapath = sprintf('%s/%s_%02d',OL490Class1Column.classpath,'peak1col',wl_offset);
                 load(datapath,'s','wl_target');
                 
@@ -147,6 +151,7 @@ classdef OL490Class1Column < handle
                 peaks = OL490Class1Column.find_spikes(wl_target,spec_no_dark);
                 peaks
                 peaks(:,2)
+                
                 %
                 % mark the target wavelength
                 %
@@ -168,40 +173,54 @@ classdef OL490Class1Column < handle
 
         function measurement_trial_search_x50_summary
 
+            datapath = sprintf('%s/%s.mat',OL490Class1Column.classpath,'my_col_wl');
+            load(datapath,'col_wl_all');
+
+            clf
+            plot(col_wl_all(:,1),col_wl_all(:,2),'.')
+            xlabel('OL490 Input Column (#)')
+            ylabel('OL490 Output Wavelength (nm)')
+            title('Relationship between OL490 column # and output wavelength')
+
+            return
+
             col_wl = []
             for i = 00:1:49
-            
+
                 datapath = sprintf('%s/%s_%02d.mat',OL490Class1Column.classpath,'peak1col',i);
                 load(datapath);
-            
+
                 % col_wl =
-            end            
+            end
         end
                 
         function measurement_trial_search_x50 (ol,cs)
+            %
+            % collect data at 1 nm over 50 times
+            %
 
             datapath = sprintf('%s/dark.mat',OL490Class1Column.classpath);
             load(datapath,'s_dark');
-            
+
             col_wl_all = [];
             for i = 00:1:49
-                
+
                 wl_target = [400+i:50:750];
                 col_wl = OL490Class1Column.measurement_trial_search(ol,cs,wl_target,s_dark);
                 col_wl_all = [col_wl_all ; col_wl];
-            
+
                 %
                 % save the spectral result
                 %
                 datapath_old = sprintf('%s/%s_%02d.mat',OL490Class1Column.classpath,'peak1col',99);
                 datapath_new = sprintf('%s/%s_%02d.mat',OL490Class1Column.classpath,'peak1col',i);
                 movefile(datapath_old,datapath_new);
-            
+
             end
-            
+
             col_wl_all = sortrows(col_wl_all);
             save('my_col_wl','col_wl_all')
-            
+
         end
         
         function col_wl = measurement_trial_search (ol,cs,wl_target,s_dark)
