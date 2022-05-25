@@ -6,6 +6,7 @@ classdef LightSim < handle
         col_wl_amp_spec    % store final data; dark removed
         spec_dark         % when all column are off (zero); needed for finding linearity
 
+        spec_1024
     end
 
     properties (Constant)
@@ -92,13 +93,41 @@ classdef LightSim < handle
             % retrieve the wl column
             wl = col_wl_amp_spec_all(:,2);
 
+            %
+            % remove wl < 400 nm
+            %
+            wl_mask = (wl >= 400);
+            col_wl_amp_spec_all = col_wl_amp_spec_all(wl_mask,:);
+
+            %
+            % remove col-duplicated rows
+            %
+
+            % retrieve the col column
+            col = col_wl_amp_spec_all(:,1);
+
+            % get unique col
+            [C,ia,ic] = unique(col);
+
+            col_wl_amp_spec_all = col_wl_amp_spec_all(ia,:);
+
+
+            %
+            % remove wl-duplicated rows
+            %
+
+            % retrieve the wl column
+            wl = col_wl_amp_spec_all(:,2);
+
             % get unique wl
             [C,ia,ic] = unique(wl);
 
-            % remove duplicated rows
             col_wl_amp_spec_all = col_wl_amp_spec_all(ia,:);
 
             obj.col_wl_amp_spec = col_wl_amp_spec_all;
+
+
+            obj.col_spec_model
 
         end
 
@@ -112,6 +141,62 @@ classdef LightSim < handle
             view([64.1830986 49.8000002])
         end
 
+        function sout = col_spec_model (obj)
+            spec_302 = obj.col_wl_amp_spec(:,4:end);
+
+            col_measured = obj.col_wl_amp_spec(:,1);
+
+            spec_1024 = zeros(1024,401);
+
+            ol490_wl_range = 380:780;
+
+            for w = 1:401
+                spec_measured = spec_302(:,w);
+                %
+                % use "linear" to interpolate between measured datapoints
+                % use "extrap" to extend to both sides
+                %
+                spec_predict = interp1(col_measured,spec_measured,1:1024,'linear','extrap');
+                spec_1024(:,w) = spec_predict';
+            end
+
+            %
+            % remove anything outside wavelength 400:750
+            %
+            spec_1024(:,1:19) = 0;
+            spec_1024(:,end-29:end) = 0;
+
+            %
+            % remove anything outside columns measured
+            %
+            spec_1024(1:col_measured(1),:) = 0;
+            spec_1024(col_measured(end):end,:) = 0;
+
+            obj.spec_1024 = spec_1024;
+
+        end
+
+        function sout = predict_vec_spec (obj, vec)
+            % vec: 1x1024
+            % sout: OL490 spectrum
+
+            assert(length(vec)==1024);
+
+            spec_vec = obj.spec_1024';
+            sout = spec_vec * vec + obj.spec_dark.amplitude';
+            return
+
+            %             sout = zeros(1,401);
+            %             for v = 1:length(vec)
+            %                 v_i = vec(v);
+            %                 spec_i = obj.spec_1024(v,:);
+            %                 sout = sout + spec_i .* v_i;
+            %             end
+            %
+            %             % add dark
+            %             sout = sout + obj.spec_dark.amplitude;
+
+        end
     end
 
     methods (Static)
