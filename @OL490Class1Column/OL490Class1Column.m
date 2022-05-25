@@ -119,7 +119,7 @@ classdef OL490Class1Column < handle
 
         end
 
-        function col_wl_amp_all = check_measurement_data
+        function col_wl_amp_spec_all = check_measurement_data
             % examine a "peak1col_??.mat file
             % to compare the expected peak and measured peak
             % ?? means expected wavelength [400+?? : 50 : 750] nm
@@ -132,7 +132,7 @@ classdef OL490Class1Column < handle
             load(datapath,'s_dark');
 
             % data stored
-            col_wl_amp_all = []
+            col_wl_amp_spec_all = [];
 
             %for wl_offset = 00:10:40
 
@@ -147,13 +147,14 @@ classdef OL490Class1Column < handle
                 spec_no_dark = s.amplitude-s_dark.amplitude;
                 peaks = OL490Class1Column.find_spikes(wl_target,spec_no_dark);
 
-
+                % consolidate data
                 col = col_range';
                 wl = peaks(:,1);
                 amp = peaks(:,2);
+                spec = spec_no_dark;
 
-                col_wl_amp = [col wl amp];
-                col_wl_amp_all = [col_wl_amp_all ; col_wl_amp];
+                col_wl_amp_spec = [col wl amp];
+                col_wl_amp_spec_all = [col_wl_amp_spec_all ; col_wl_amp_spec];
 
                 if 0
                     %
@@ -181,6 +182,7 @@ classdef OL490Class1Column < handle
                 end
             end
 
+            col_wl_amp_spec_all = sortrows(col_wl_amp_spec_all);
         end
 
         function measurement_trial_search_x50_summary
