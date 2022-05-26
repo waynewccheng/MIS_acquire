@@ -161,18 +161,17 @@ classdef LightSim < handle
             for col = 1:1024
                 
                 % convert column to wavelengtg based on measurement data "col_wl"
-                wl_center = round((col-72)/(956-72)*(750-400)+400);
-                
-                wl_start = wl_center - 15;
-                wl_end = wl_center + 15;
-                
-                reflectance(col,wl_start:wl_end) = toothfilter;
-                
+                wl_center = (col-72)/(956-72)/(750-400)+400;
+                col_measured = col_wl(:,1);
+                spec_measured = reflectance_36(:,w);
+                %
+                % use "linear" to interpolate between measured datapoints
+                % use "extrap" to extend to both sides
+                %
+                spec_predict = interp1(col_measured,spec_measured,1:1024,'linear','extrap');
+                reflectance(:,w) = spec_predict';
             end
 
-            % crop 380:780
-            reflectance = reflectance(:,380:780);
-            
             obj.reflectance = reflectance;
             
         end
@@ -292,32 +291,6 @@ classdef LightSim < handle
             
         end
 
-        function sout = predict_by_filter (obj, vec)
-            % vec: 1x1024
-            % sout: OL490 spectrum
-            
-            assert(length(vec)==1024);
-            
-            spec_vec = obj.reflectance';
-            reflectance_total = spec_vec * vec;
-            spd_reflected = obj.spd_all' .* reflectance_total;
-            
-            sout = spd_reflected + obj.spd_0';
-            
-            return
-            
-            %             sout = zeros(1,401);
-            %             for v = 1:length(vec)
-            %                 v_i = vec(v);
-            %                 spec_i = obj.spec_1024(v,:);
-            %                 sout = sout + spec_i .* v_i;
-            %             end
-            %
-            %             % add dark
-            %             sout = sout + obj.spec_dark.amplitude;
-            
-        end
-        
         function sout = predict_by_reflectance (obj, vec)
             % vec: 1x1024
             % sout: OL490 spectrum
