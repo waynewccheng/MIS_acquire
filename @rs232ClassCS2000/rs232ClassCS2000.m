@@ -10,7 +10,7 @@ classdef rs232ClassCS2000
     methods
 
         function obj = rs232ClassCS2000 (portname)
-            obj.S = serialport(portname,38400,'DataBits',8,'StopBits',1,'FlowControl','none');
+            obj.S = serialport(portname,38400,'DataBits',8,'StopBits',1,'FlowControl','none','Timeout',60);
         end
         
         %% close the serial port

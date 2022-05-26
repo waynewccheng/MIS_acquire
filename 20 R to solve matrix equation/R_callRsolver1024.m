@@ -20,7 +20,7 @@ function A = R_callRsolver (M, B)
     %system('"C:/Program Files/R/R-4.2.0/bin/x64/R" CMD BATCH R_my1024.R')
 
     % Chihlei
-    system('"C:/Program Files/R/R-3.3.1/bin/x64/R" CMD BATCH R_my1024.R')
+    system('"C:/Program Files/R/R-4.2.0/bin/x64/R" CMD BATCH R_my1024.R')
 
     A = csvread('R_A.txt');
 end
