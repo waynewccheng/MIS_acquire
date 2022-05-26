@@ -172,6 +172,29 @@ classdef LightSim < handle
             spec_1024(1:col_measured(1),:) = 0;
             spec_1024(col_measured(end):end,:) = 0;
 
+            %
+            % conditioning
+            %
+            near_zero = 0.00000001;
+            for i = 1:1024
+                s = spec_1024(i,:);
+
+                % get the peak
+                [peak_y peak_x] = max(s);
+
+                % remove tiny signals
+                m = s < (peak_y * 0.05);
+                s(m) = near_zero;
+
+                % remove out-of-band signals for near UV and IR
+                % bandwidth are mostly 18, 19, and 20
+                x_grid = 1:401;
+                m = abs(x_grid - peak_x) > 25/2;
+                s(m) = near_zero;
+
+                spec_1024(i,:) = s;
+            end
+
             obj.spec_1024 = spec_1024;
 
         end
