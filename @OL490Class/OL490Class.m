@@ -85,7 +85,10 @@ classdef OL490Class < handle
         
         %%
         function setColumn1024Gamma (obj, A)
-            veclut = [0,0; 0.100000000000000,0.0174154675672971;0.200000000000000,0.0288521591733234;0.300000000000000,0.0443881664199884;0.400000000000000,0.0722865877650448;0.500000000000000,0.140172225476376;0.600000000000000,0.247878154595747;0.700000000000000,0.400399361796317;0.800000000000000,0.596147604681164;0.900000000000000,0.772382655388365;1,1];
+            
+            % 6/3/2022
+            
+            load('gamma_lut','gamma_lut');
             
             st = zeros(1,1024);
 
@@ -93,7 +96,7 @@ classdef OL490Class < handle
                 
                 % adjust this value
                 sc_linear = A(colno);
-                sc = interp1(veclut(:,2),veclut(:,1),sc_linear,'spline');
+                sc = interp1(gamma_lut(:,2),gamma_lut(:,1),sc_linear,'linear');
                 st(1,colno) = obj.max_column_value * sc;
             end
 
