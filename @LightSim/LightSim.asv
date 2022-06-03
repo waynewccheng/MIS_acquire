@@ -41,14 +41,6 @@ classdef LightSim < handle
             
         end
         
-        function test_vec (obj,ol,cs,vec)
-            ol.setColumn1024Gamma(vec);
-            mea = cs.measure;
-            
-            clf
-            mea.plot
-        end
-                
         function vec = spd2vec (obj,spd_target)
             % find the linear vector to generate spd
             
@@ -79,42 +71,26 @@ classdef LightSim < handle
             %
             ref_m = obj.col_spec';
             vec_orig = R_callRsolver1024(ref_m,ref_target);
-if 0
-load('vec','vec')
-vec_orig = vec;
-end
+
             % limit to [0,1]
             vec = vec_orig;
             vec = min(1,vec);
             vec = max(0,vec);
             
-            % visualize the vector
+            % visualize
             clf
             plot(vec)
-            title('Check the vector given by R')
-
-            % predict the reflectance
-            ref_predicted = obj.vec2ref(vec);
+            title('Check solution given by R')
 
             % visualize
             clf
             hold on
             plot(ref_target)
-            plot(ref_predicted)
-            legend('target','predicted')
-            title('Check predicted reflectance')
+            ref = ref_m * vec_a;
+            plot(ref)
+            legend('target','calculated')
+            title('reflectance')
             
-        end
-        
-        function ref_predicted = vec2ref (obj,vec)
-            % predict the reflectance with linear vector
-            
-            ref_predicted = obj.col_spec' * vec + (obj.spd_min ./ obj.spd_max);
-
-            % visualize
-            clf
-            plot(ref_predicted)
-            title('Check predicted reflectance')
         end
         
         %         function construct_vec_8_pencils (obj)
