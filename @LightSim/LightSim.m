@@ -93,6 +93,21 @@ classdef LightSim < handle
             saveas(gh,'colorchecker_test_result.png')
         end
 
+        function rs = model_HPZ24x (obj)
+            % temp -- see HPZ24xSim
+            sc = 0.07;
+            spec_z24x = xlsread('hpz24x_rgb.csv');
+            
+            spec_z24x = spec_z24x(21:end,:)'*sc;
+            
+            vec_r = obj.spd2vec(spec_z24x(1,:));
+            vec_g = obj.spd2vec(spec_z24x(2,:));
+            vec_b = obj.spd2vec(spec_z24x(3,:));
+            
+            save('vec_hp24z','vec*')
+
+        end
+        
         function rs = model_rift (obj)
             rs = RiftSim(0.08);
             
@@ -179,9 +194,12 @@ classdef LightSim < handle
         function vec = spd2vec (obj,spd_target)
             % find the linear vector to generate spd
             
-            if (size(spd_target,1)==401 && size(spd_target,2)==1)
+            if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
                 spd_target = spd_target';
             end
+            
+            % need to be vertical
+            assert(size(spd_target,1)==401 && size(spd_target,2)==1);
             
             % visualize
             if 0

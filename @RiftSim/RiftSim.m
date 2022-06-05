@@ -1,4 +1,4 @@
-classdef RiftSim < handle
+classdef RiftSim < DispSim
     
     properties
         dataspec
@@ -7,21 +7,15 @@ classdef RiftSim < handle
         ramp_b
         lut_x
         lut
-        sc
-    end
-    
-    properties (Constant)
-        
-        % the data files are stored in the class folder
-        
-        classpath = fileparts(which('RiftSim'));
     end
     
     methods
         
-        function obj = RiftSim (sc)
+        function obj = RiftSim
+            obj.classpath = fileparts(which('RiftSim'));
+
             % scaling factor
-            obj.sc = sc;
+            obj.sc = 0.08;
             
             datapath = sprintf('%s/%s',LightSim.classpath,'mydata04042022-prelens.mat');
             load(datapath,'dataspec');
@@ -63,9 +57,15 @@ classdef RiftSim < handle
             obj.lut_x = lut_x';
             obj.lut = lut;
             
-            obj.ramp_r = ramp_r;
-            obj.ramp_g = ramp_g;
-            obj.ramp_b = ramp_b;
+            % scaled down the public data
+            obj.ramp_r = ramp_r * obj.sc;
+            obj.ramp_g = ramp_g * obj.sc;
+            obj.ramp_b = ramp_b * obj.sc;
+
+            obj.spec_r = ramp_r(end,:) * obj.sc;
+            obj.spec_g = ramp_g(end,:) * obj.sc;
+            obj.spec_b = ramp_b(end,:) * obj.sc;
+            
         end
         
         function rgb_lin = gamma (obj,rgb)
@@ -78,46 +78,6 @@ classdef RiftSim < handle
             rgb_lin = [r_lin g_lin b_lin];
         end
 
-        function rgb_lin = gamut (obj)
-            
-            srgb = [0.64 0.33; 0.3 0.6 ; 0.15 0.06];
-            p3 = [0.68 0.32; 0.265 0.69 ; 0.15 0.06];
-            rec2020 = [0.708 0.292; 0.170 0.797 ; 0.131 0.046];
-            
-            spec_r = obj.ramp_r(end,1:10:end);
-            spec_g = obj.ramp_g(end,1:10:end);
-            spec_b = obj.ramp_b(end,1:10:end);
-            
-            cc = ColorConversionClass;
-            
-            XYZ_r = cc.spd2XYZ(spec_r');
-            XYZ_g = cc.spd2XYZ(spec_g');
-            XYZ_b = cc.spd2XYZ(spec_b');
-            
-            xyz_r = XYZ_r / sum(XYZ_r);
-            xyz_g = XYZ_g / sum(XYZ_g);
-            xyz_b = XYZ_b / sum(XYZ_b);
-            
-            clf
-            hold on
-            plot(xyz_r(1),xyz_r(2),'or')
-            plot(xyz_g(1),xyz_g(2),'og')
-            plot(xyz_b(1),xyz_b(2),'ob')
-
-            plot(srgb([1 2 3 1],1),srgb([1 2 3 1],2),'-')
-            plot(p3([1 2 3 1],1),p3([1 2 3 1],2),'-')
-            plot(rec2020([1 2 3 1],1),rec2020([1 2 3 1],2),'-')
-            
-            axis equal
-            'oh'
-
-            return
-            
-            plot(380:780,spec_r,'r')
-            plot(380:780,spec_g,'g')
-            plot(380:780,spec_b,'b')            
-        end        
-        
         function spec = output (obj, rgb)
             
             rgb = round(rgb);

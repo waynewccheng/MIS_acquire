@@ -93,6 +93,20 @@ classdef LightSim < handle
             saveas(gh,'colorchecker_test_result.png')
         end
 
+        function rs = model_HPZ24x (obj)
+            % temp 
+            sc = 0.07;
+            spec_z24x = xlsread('hpz24x_rgb.csv');
+            spec_z24x = spec_z24x(21:end,:)';
+            
+            vec_r = obj.spd2vec(spec_z24x(1,:));
+            vec_g = obj.spd2vec(spec_z24x(2,:));
+            vec_b = obj.spd2vec(spec_z24x(3,:));
+            
+            save('vec_hp24z','vec*')
+
+        end
+        
         function rs = model_rift (obj)
             rs = RiftSim(0.08);
             
@@ -104,7 +118,7 @@ classdef LightSim < handle
         end
         
 
-        function xyz = analyze_rift (obj)
+        function dE = analyze_rift (obj)
             
             load('colorchecker_test_result.mat','spd_rift_24','spd_ol490_24')
             
@@ -131,8 +145,13 @@ classdef LightSim < handle
             
             % XYZ is 24x3
             XYZ_rift = cc.spd2XYZ(spec');
-
+            LAB_rift = cc.XYZ2lab(XYZ_rift,XYZ_rift(19,:));
             
+            for i = 1:24
+                 [dE00 dE94 dEab] = cc.LAB2dE(LAB_rift(i,:)',LAB_ol490(i,:)');
+                 dE(i) = dE00;
+            end
+            'oh'
         end
         
         function [spd_rift spd_ol490] = compare_rift (obj,ol,cs,rgb)
@@ -174,9 +193,12 @@ classdef LightSim < handle
         function vec = spd2vec (obj,spd_target)
             % find the linear vector to generate spd
             
-            if (size(spd_target,1)==401 && size(spd_target,2)==1)
+            if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
                 spd_target = spd_target';
             end
+            
+            % need to be vertical
+            assert(size(spd_target,1)==401 && size(spd_target,2)==1);
             
             % visualize
             if 0
