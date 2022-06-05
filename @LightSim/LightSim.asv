@@ -8,7 +8,12 @@ classdef LightSim < handle
         spd_min
         spd_max_date
         spd_min_date
+       
+        vec_r
+        vec_g
+        vec_b
         
+        rs
     end
     
     properties (Constant)
@@ -16,6 +21,34 @@ classdef LightSim < handle
         % the data files are stored in the class folder
         
         classpath = fileparts(which('LightSim'));
+        
+        colorchecker_rgb = [115 82 68;
+            194 150 130;
+            98  122 157;
+            87  108 67;
+            133 128 177;
+            103 189 170;
+            
+            214 126 44;
+            80  91  166;
+            193 90  99;
+            94  60  108;
+            157 188 64;
+            224 163 46;
+            
+            56  61  150;
+            70  148 73;
+            175 54  60;
+            231 199 31;
+            187 86  149;
+            8   133 161;
+            
+            243 243 242;
+            200 200 200;
+            160 160 160;
+            122 122 121;
+            85  85  85;
+            52  52  52];
     end
     
     methods
@@ -34,23 +67,126 @@ classdef LightSim < handle
             %
             datapath = sprintf('%s/%s',LightSim.classpath,'spd_max.mat');
             load(datapath,'spd_m*');
-            obj.spd_max = spd_max;            
-            obj.spd_min = spd_min;            
-            obj.spd_max_date = spd_max_date;            
-            obj.spd_min_date = spd_min_date;            
+            obj.spd_max = spd_max;
+            obj.spd_min = spd_min;
+            obj.spd_max_date = spd_max_date;
+            obj.spd_min_date = spd_min_date;
             
+        end
+        
+        function colorchecker_test (obj,ol,cs)
+            
+            spd_rift_24 = {};
+            spd_ol490_24 = {};
+            
+            clf
+            for i = 1:24
+                subplot(4,6,i)
+                [spd_rift spd_ol490] = obj.compare_rift(ol,cs,obj.colorchecker_rgb(i,:));
+                spd_rift_24{i} = spd_rift;
+                spd_ol490_24{i} = spd_ol490;
+            end
+            save('colorchecker_test_result.mat','spd_rift_24','spd_ol490_24')
+            
+            gh = gcf;
+            gh.Position = [680 265 1363 833];
+            saveas(gh,'colorchecker_test_result.png')
+        end
+
+        function rs = model_rift (obj)
+            rs = RiftSim(0.08);
+            
+            obj.vec_r = obj.spd2vec(rs.output([255 0 0]));
+            obj.vec_g = obj.spd2vec(rs.output([0 255 0]));
+            obj.vec_b = obj.spd2vec(rs.output([0 0 255]));
+            
+            obj.rs = rs;
+        end
+        
+
+        function xyz = analyze_rift (obj)
+            
+            load('colorchecker_test_result.mat','spd_rift_24','spd_ol490_24')
+            
+            
+            cc = ColorConversionClass;
+
+            spec = zeros(24,41);
+            for i = 1:24
+                s = spd_ol490_24{i};
+                s = s(1:10:end);
+                spec(i,:) = s;
+            end
+
+            % XYZ is 24x3
+            XYZ_ol490 = cc.spd2XYZ(spec');
+            LAB_ol490 = cc.XYZ2lab(XYZ_ol490,XYZ_ol490(19,:));
+            
+            spec = zeros(24,41);
+            for i = 1:24
+                s = spd_rift_24{i};
+                s = s(1:10:end);
+                spec(i,:) = s;
+            end
+            
+            % XYZ is 24x3
+            XYZ_rift = cc.spd2XYZ(spec');
+
+            
+        end
+        
+        function [spd_rift spd_ol490] = compare_rift (obj,ol,cs,rgb)
+            
+            % obtain linear RGB on Rift
+            rgb_lin = obj.rs.gamma(rgb);
+            
+            % get pre-calculated vectors for Rift primaries
+            % load('rift_vec','vec_r','vec_g','vec_b')
+            
+            % assume additivity
+            vec = obj.vec_r * rgb_lin(1) + obj.vec_g * rgb_lin(2) + obj.vec_b * rgb_lin(3);
+            
+            % lit the light
+            spd_ol490 = obj.test_vec(ol,cs,vec);
+            
+            % pre-determined earlier
+            spd_rift = obj.rs.output(rgb);
+            
+            hold on
+            plot(380:780,spd_rift)
+            plot(380:780,spd_ol490)
+            legend('Rift','OL490')
+            axis([380 780 0 3e-4])
+            
+        end
+        
+        function spd = test_vec (obj,ol,cs,vec)
+            ol.setColumn1024Gamma(vec);
+            mea = cs.measure;
+            spd = mea.amplitude;
+            
+            if 0
+            clf
+            mea.plot
+            end
         end
         
         function vec = spd2vec (obj,spd_target)
             % find the linear vector to generate spd
             
+            if (size(spd_target,1)==401 && size(spd_target,2)==1)
+                spd_target = spd_target';
+            end
+            
             % visualize
+            if 0
             clf
             hold on
             plot(380:780,obj.spd_max)
             plot(380:780,spd_target)
             legend('spd max','spd target')
             title('Check the target spd')
+            end
             
             %
             % calcualte the reflectance
@@ -60,36 +196,66 @@ classdef LightSim < handle
             ref_target = max(0,ref_target);
             
             % visualize
+            if 0
             clf
             hold on
             plot(ref_target_orig)
             plot(ref_target)
             title('Check target reflectance')
+            end
             
             %
             % solve the equation with R
             %
             ref_m = obj.col_spec';
-            vec_orig = R_callRsolver1024(ref_m,ref_target);
+            rsolve = Rsolver(ref_m,ref_target);
 
+            vec_orig = rsolve.A;
+            
+            %            vec_orig = R_callRsolver1024(ref_m,ref_target);
+            if 0
+                load('vec','vec')
+                vec_orig = vec;
+            end
+            
             % limit to [0,1]
             vec = vec_orig;
             vec = min(1,vec);
             vec = max(0,vec);
             
-            % visualize
+            % visualize the vector
+            if 0
             clf
             plot(vec)
-            title('Check solution given by R')
-
+            title('Check the vector given by R')
+            end
+            
+            % predict the reflectance
+            ref_predicted = obj.vec2ref(vec);
+            
             % visualize
+            if 0
             clf
             hold on
             plot(ref_target)
-            ref = ref_m * vec_a;
-            plot(ref)
-            legend('target','calculated')
-            title('reflectance')
+            plot(ref_predicted)
+            legend('target','predicted')
+            title('Check predicted reflectance')
+            end
+            
+        end
+        
+        function ref_predicted = vec2ref (obj,vec)
+            % predict the reflectance with linear vector
+            
+            ref_predicted = obj.col_spec' * vec + (obj.spd_min ./ obj.spd_max);
+            
+            % visualize
+            if 0
+            clf
+            plot(ref_predicted)
+            title('Check predicted reflectance')
+            end
             
         end
         

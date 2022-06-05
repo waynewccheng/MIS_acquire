@@ -12,7 +12,7 @@ R_mysolveA1024 <- function () {
   objfnc <- function (A) sum(((M %*% A - B)^2) * 1)
   
 #  res <- optim(A.init, objfnc, method = "L-BFGS-B", lower = 0, upper = Inf, control = list(trace = 2, pgtol = 5e-6))
-    res <- optim(A.init, objfnc, method = "L-BFGS-B", lower = 0, upper = Inf, control = list(trace = 2, pgtol = 5e-7))
+    res <- optim(A.init, objfnc, method = "L-BFGS-B", lower = 0, upper = 1, control = list(trace = 2, pgtol = 5e-7))
 
   write.table(res$par,file="R_A.txt",sep=",",row.names = FALSE,col.names = FALSE)
 }
