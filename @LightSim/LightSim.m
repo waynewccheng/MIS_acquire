@@ -85,6 +85,11 @@ classdef LightSim < handle
                 [spd_disp spd_ol490] = obj.compare_disp_ol490(ol,cs,disp,vec_filename,obj.colorchecker_rgb(i,:));
                 spd_disp_24{i} = spd_disp;
                 spd_ol490_24{i} = spd_ol490;
+                
+                %
+                %
+                %
+                input(sprintf('%02d:',i))
             end
             save('colorchecker_test_result_temp.mat','spd_disp_24','spd_ol490_24')
             

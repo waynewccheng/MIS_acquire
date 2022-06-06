@@ -18,6 +18,9 @@ classdef OL490Class < handle
                     
         % use 40000 for calibration
         max_column_value = 40000;
+        
+        gamma_lut
+        classpath
     end
     
     methods
@@ -27,7 +30,12 @@ classdef OL490Class < handle
 
             [filepath,name,ext] = fileparts(which('OL490Class'));                
             ol490dllpath = filepath;
+            obj.classpath = ol490dllpath;
 
+            filepath = sprintf('%s/%s.mat',obj.classpath,'gamma_lut')
+            load(filepath,'gamma_lut');
+            obj.gamma_lut = gamma_lut;
+            
             %% todo: check existing assembly
             % http://stackoverflow.com/questions/5368974/how-to-check-if-net-assembly-was-already-added-in-matlab
             
@@ -87,16 +95,13 @@ classdef OL490Class < handle
         function setColumn1024Gamma (obj, A)
             
             % 6/3/2022
-            
-            load('gamma_lut','gamma_lut');
-            
             st = zeros(1,1024);
 
             for colno = 1:1024
                 
                 % adjust this value
                 sc_linear = A(colno);
-                sc = interp1(gamma_lut(:,2),gamma_lut(:,1),sc_linear,'linear');
+                sc = interp1(obj.gamma_lut(:,2),obj.gamma_lut(:,1),sc_linear,'linear');
                 st(1,colno) = obj.max_column_value * sc;
             end
 
