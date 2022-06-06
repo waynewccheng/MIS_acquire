@@ -74,6 +74,25 @@ classdef LightSim < handle
             
         end
         
+        function colorchecker_test_temp (obj,ol,cs,disp,vec_filename)
+            
+            spd_disp_24 = {};
+            spd_ol490_24 = {};
+            
+            clf
+            for i = 1:24
+                subplot(4,6,i)
+                [spd_disp spd_ol490] = obj.compare_disp_ol490(ol,cs,disp,vec_filename,obj.colorchecker_rgb(i,:));
+                spd_disp_24{i} = spd_disp;
+                spd_ol490_24{i} = spd_ol490;
+            end
+            save('colorchecker_test_result_temp.mat','spd_disp_24','spd_ol490_24')
+            
+            gh = gcf;
+            gh.Position = [680 265 1363 833];
+            saveas(gh,'colorchecker_test_result_temp.png')
+        end
+        
         function colorchecker_test (obj,ol,cs)
             
             spd_rift_24 = {};
@@ -93,6 +112,20 @@ classdef LightSim < handle
             saveas(gh,'colorchecker_test_result.png')
         end
 
+        function rs = model_NEC (obj)
+            
+            % NEC PA271 Adobe
+            
+            nec = NECPA271Sim;
+            
+            vec_r = obj.spd2vec(nec.spec_r);
+            vec_g = obj.spd2vec(nec.spec_g);
+            vec_b = obj.spd2vec(nec.spec_b);
+            
+            save('vec_nec','vec*')
+
+        end
+        
         function rs = model_HPZ24x (obj)
             % temp -- see HPZ24xSim
             sc = 0.07;
@@ -154,7 +187,53 @@ classdef LightSim < handle
             end
             'oh'
         end
+
+
+        function compare_primary (obj,ol,cs,vec_filename,dispsim)
+            load(vec_filename)
+            
+            % lit the light
+            spd_ol490_r = obj.test_vec(ol,cs,vec_r);
+            spd_ol490_g = obj.test_vec(ol,cs,vec_g);
+            spd_ol490_b = obj.test_vec(ol,cs,vec_b);
+            
+            clf
+            hold on
+            plot(380:780,spd_ol490_r,':r')
+            plot(380:780,dispsim.spec_r,'r')            
+            plot(380:780,spd_ol490_g,':g')
+            plot(380:780,dispsim.spec_g,'g')            
+            plot(380:780,spd_ol490_b,':b')
+            plot(380:780,dispsim.spec_b,'b')      
+            
+            save('primary_results','spd_*')
+        end
         
+        function [spd_disp spd_ol490] = compare_disp_ol490 (obj,ol,cs,disp,vec_filename,rgb)
+            
+            % obtain linear RGB on Rift
+            [spd_disp rgb_lin] = disp.rgb2spec(rgb);
+            
+            % get pre-calculated vectors for Rift primaries
+            load(vec_filename,'vec_r','vec_g','vec_b')
+            
+            % assume additivity
+            vec = vec_r * rgb_lin(1) + vec_g * rgb_lin(2) + vec_b * rgb_lin(3);
+            vec = max(0,vec);
+            vec = min(1,vec);
+            
+            % lit the light
+            spd_ol490 = obj.test_vec(ol,cs,vec);
+            
+            %clf
+            hold on
+            plot(380:780,spd_disp)
+            plot(380:780,spd_ol490)
+            legend('Display','OL490')
+            axis([380 780 0 3e-4])
+            
+        end
+
         function [spd_rift spd_ol490] = compare_rift (obj,ol,cs,rgb)
             
             % obtain linear RGB on Rift

@@ -23,7 +23,7 @@ classdef HPZ24xSim < DispSim
             % scaling factor
             obj.sc = 0.07;
             
-            datapath = sprintf('%s/%s',LightSim.classpath,'hpz24x_rgb.csv');
+            datapath = sprintf('%s/%s',objhp.classpath,'hpz24x_rgb.csv');
             spec_z24x = xlsread(datapath);
             spec_z24x = spec_z24x(21:end,:)' * obj.sc;
             

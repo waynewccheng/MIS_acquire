@@ -23,9 +23,9 @@ Type 'q()' to quit R.
 > R_mysolveA1024()
 N = 1024, M = 5 machine precision = 2.22045e-16
 The initial X is infeasible.  Restart with its projection.
-final  value 0.259356 
+final  value 0.032933 
 stopped after 101 iterations
 > 
 > proc.time()
    user  system elapsed 
- 128.60    0.54  129.34 
+ 130.07    0.53  130.99 

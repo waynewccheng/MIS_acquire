@@ -6,17 +6,34 @@ classdef DispSim < handle
         spec_g
         spec_b        
         classpath
+        gamma_srgb
     end
     
     methods
 
         function show_spectra (obj)
             %clf
-            %hold on
+            hold on
             plot(380:1:780,obj.spec_r,'r');
             plot(380:1:780,obj.spec_g,'g');
             plot(380:1:780,obj.spec_b,'b');            
             legend('Red','Green','Blue')
+        end
+        
+        function spec = rgb2spec (obj,rgb)
+            rgb_lin = interp1(obj.gamma_srgb(:,1),obj.gamma_srgb(:,2),rgb/255.0);
+            spec = obj.spec_r * rgb_lin(1) + obj.spec_g * rgb_lin(2) + 
+        end
+        
+        function show_gamma (obj)
+            ddl = [0:255]/255;
+            rgb = [ddl' ddl' ddl'];
+            lab = rgb2lab(rgb);
+            xyz = lab2xyz(lab);
+            obj.gamma_srgb(:,1) = ddl;
+            obj.gamma_srgb(:,2) = xyz(:,2);
+            
+            plot(obj.gamma_srgb(:,1),obj.gamma_srgb(:,2))
         end
         
         function rgb_lin = gamut (obj)

@@ -17,7 +17,7 @@ classdef RiftSim < DispSim
             % scaling factor
             obj.sc = 0.08;
             
-            datapath = sprintf('%s/%s',LightSim.classpath,'mydata04042022-prelens.mat');
+            datapath = sprintf('%s/%s',obj.classpath,'mydata04042022-prelens.mat');
             load(datapath,'dataspec');
             obj.dataspec = dataspec;
             
