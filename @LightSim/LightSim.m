@@ -8,7 +8,7 @@ classdef LightSim < handle
         spd_min
         spd_max_date
         spd_min_date
-       
+        
         vec_r
         vec_g
         vec_b
@@ -118,7 +118,7 @@ classdef LightSim < handle
             gh.Position = [680 265 1363 833];
             saveas(gh,'colorchecker_test_result.png')
         end
-
+        
         function rs = model_NEC (obj)
             
             % NEC PA271 Adobe
@@ -130,7 +130,7 @@ classdef LightSim < handle
             vec_b = obj.spd2vec(nec.spec_b);
             
             save('vec_nec','vec*')
-
+            
         end
         
         function rs = model_HPZ24x (obj)
@@ -145,7 +145,7 @@ classdef LightSim < handle
             vec_b = obj.spd2vec(spec_z24x(3,:));
             
             save('vec_hp24z','vec*')
-
+            
         end
         
         function rs = model_rift (obj)
@@ -158,21 +158,21 @@ classdef LightSim < handle
             obj.rs = rs;
         end
         
-
+        
         function dE = analyze_rift (obj)
             
             load('colorchecker_test_result.mat','spd_rift_24','spd_ol490_24')
             
             
             cc = ColorConversionClass;
-
+            
             spec = zeros(24,41);
             for i = 1:24
                 s = spd_ol490_24{i};
                 s = s(1:10:end);
                 spec(i,:) = s;
             end
-
+            
             % XYZ is 24x3
             XYZ_ol490 = cc.spd2XYZ(spec');
             LAB_ol490 = cc.XYZ2lab(XYZ_ol490,XYZ_ol490(19,:));
@@ -189,13 +189,13 @@ classdef LightSim < handle
             LAB_rift = cc.XYZ2lab(XYZ_rift,XYZ_rift(19,:));
             
             for i = 1:24
-                 [dE00 dE94 dEab] = cc.LAB2dE(LAB_rift(i,:)',LAB_ol490(i,:)');
-                 dE(i) = dE00;
+                [dE00 dE94 dEab] = cc.LAB2dE(LAB_rift(i,:)',LAB_ol490(i,:)');
+                dE(i) = dE00;
             end
             'oh'
         end
-
-
+        
+        
         function compare_primary (obj,ol,cs,vec_filename,dispsim)
             load(vec_filename)
             
@@ -207,11 +207,11 @@ classdef LightSim < handle
             clf
             hold on
             plot(380:780,spd_ol490_r,':r')
-            plot(380:780,dispsim.spec_r,'r')            
+            plot(380:780,dispsim.spec_r,'r')
             plot(380:780,spd_ol490_g,':g')
-            plot(380:780,dispsim.spec_g,'g')            
+            plot(380:780,dispsim.spec_g,'g')
             plot(380:780,spd_ol490_b,':b')
-            plot(380:780,dispsim.spec_b,'b')      
+            plot(380:780,dispsim.spec_b,'b')
             
             save('primary_results','spd_*')
         end
@@ -240,7 +240,7 @@ classdef LightSim < handle
             axis([380 780 0 3e-4])
             
         end
-
+        
         function [spd_rift spd_ol490] = compare_rift (obj,ol,cs,rgb)
             
             % obtain linear RGB on Rift
@@ -272,8 +272,8 @@ classdef LightSim < handle
             spd = mea.amplitude;
             
             if 0
-            clf
-            mea.plot
+                clf
+                mea.plot
             end
         end
         
@@ -289,12 +289,12 @@ classdef LightSim < handle
             
             % visualize
             if 0
-            clf
-            hold on
-            plot(380:780,obj.spd_max)
-            plot(380:780,spd_target)
-            legend('spd max','spd target')
-            title('Check the target spd')
+                clf
+                hold on
+                plot(380:780,obj.spd_max)
+                plot(380:780,spd_target)
+                legend('spd max','spd target')
+                title('Check the target spd')
             end
             
             %
@@ -306,11 +306,11 @@ classdef LightSim < handle
             
             % visualize
             if 0
-            clf
-            hold on
-            plot(ref_target_orig)
-            plot(ref_target)
-            title('Check target reflectance')
+                clf
+                hold on
+                plot(ref_target_orig)
+                plot(ref_target)
+                title('Check target reflectance')
             end
             
             %
@@ -318,7 +318,7 @@ classdef LightSim < handle
             %
             ref_m = obj.col_spec';
             rsolve = Rsolver(ref_m,ref_target);
-
+            
             vec_orig = rsolve.A;
             
             %            vec_orig = R_callRsolver1024(ref_m,ref_target);
@@ -334,9 +334,9 @@ classdef LightSim < handle
             
             % visualize the vector
             if 0
-            clf
-            plot(vec)
-            title('Check the vector given by R')
+                clf
+                plot(vec)
+                title('Check the vector given by R')
             end
             
             % predict the reflectance
@@ -344,12 +344,12 @@ classdef LightSim < handle
             
             % visualize
             if 0
-            clf
-            hold on
-            plot(ref_target)
-            plot(ref_predicted)
-            legend('target','predicted')
-            title('Check predicted reflectance')
+                clf
+                hold on
+                plot(ref_target)
+                plot(ref_predicted)
+                legend('target','predicted')
+                title('Check predicted reflectance')
             end
             
         end
@@ -361,9 +361,9 @@ classdef LightSim < handle
             
             % visualize
             if 0
-            clf
-            plot(ref_predicted)
-            title('Check predicted reflectance')
+                clf
+                plot(ref_predicted)
+                title('Check predicted reflectance')
             end
             
         end
@@ -449,7 +449,75 @@ classdef LightSim < handle
     
     methods (Static)
         
+        function evaluate_spec_cl500a_hp
+            data_cl500a = DeviceData;
+            data_cs2000 = DeviceData;
+            
+            fn_cl500a = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_hp.xlsx';
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\colorchecker_test_result_hp.mat';
+            
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            
+            clf
+            data_cl500a.compare_with_ref(data_cs2000,0)
+        end
         
+        function evaluate_spec_cl500a_nec
+            data_cl500a = DeviceData;
+            data_cs2000 = DeviceData;
+            
+            fn_cl500a = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_nec.xlsx';
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\colorchecker_test_result_nec.mat';
+            
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            
+            clf
+            data_cl500a.compare_with_ref(data_cs2000,0)
+        end
+        
+        function evaluate_spec_i1_nec
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\colorchecker_test_result_nec.mat';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\i1data_nec.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+            
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+        end
+
+        function evaluate_spec_i1_hp
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\hp_i1_0608\colorchecker_test_result_hp.mat';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\hp_i1_0608\i1data_hp.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+            
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+        end
+        
+        function evaluate_spec_i1_rift
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\rift_i1_0608\colorchecker_test_result_rift.mat';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\rift_i1_0608\i1data_rift.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+            
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+        end
         
         %
         % find the peak of a single spike in a spectrum
