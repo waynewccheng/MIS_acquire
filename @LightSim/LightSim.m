@@ -449,6 +449,32 @@ classdef LightSim < handle
     
     methods (Static)
         
+        function evaluate_test_nec
+
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_nec.mat';
+            fn_cl500a = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_nec.xlsx';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\i1data_nec.mat';
+
+            data_cs2000 = DeviceData;
+            data_cl500a = DeviceData;
+            data_i1 = DeviceData;            
+            data_lightsim = DeviceData;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_i1.construct_by_i1(fn_i1)
+            
+            cpr = ColorPerformanceReview;
+
+            a = data_cs2000;
+            b = data_i1;
+            
+            %cpr.evaluate_visual(a,b);
+           %cpr.evaluate_order(a,b); 
+                      cpr.show3dquiver(a,b); 
+        end
+        
         function evaluate_spec_cl500a_hp
             data_cl500a = DeviceData;
             data_cs2000 = DeviceData;
@@ -517,7 +543,51 @@ classdef LightSim < handle
             
             clf
             data_i1.compare_with_ref(data_cs2000,4000)
+            
+                        'hi'
         end
+        
+        function evaluate_spec_LightSim_rift
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_rift.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+            
+            'hi'
+        end
+        
+        function evaluate_spec_LightSim_hp
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_hp.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+        end
+
+        function evaluate_spec_LightSim_nec
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_nec.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+        end
+
         
         %
         % find the peak of a single spike in a spectrum
