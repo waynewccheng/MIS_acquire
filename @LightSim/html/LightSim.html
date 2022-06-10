@@ -1,0 +1,1492 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>LightSim: A testbed for evaluating color calibration kits</title><meta name="generator" content="MATLAB 9.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-06-10"><meta name="DC.source" content="LightSim.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>LightSim: A testbed for evaluating color calibration kits</h1><pre class="codeinput"><span class="keyword">classdef</span> LightSim &lt; handle
+    <span class="comment">%%LIGHTSIM A testbed for evaluating color calibration kits</span>
+    <span class="comment">% Find relationship between 1024-column control and ouput spectra of OL490</span>
+
+    <span class="keyword">properties</span>
+
+        col_spec
+        spd_max
+        spd_min
+        spd_max_date
+        spd_min_date
+
+        vec_r
+        vec_g
+        vec_b
+
+        rs
+    <span class="keyword">end</span>
+
+    <span class="keyword">properties</span> (Constant)
+
+        <span class="comment">% the data files are stored in the class folder</span>
+
+        classpath = fileparts(which(<span class="string">'LightSim'</span>));
+
+        colorchecker_rgb = [115 82 68;
+            194 150 130;
+            98  122 157;
+            87  108 67;
+            133 128 177;
+            103 189 170;
+
+            214 126 44;
+            80  91  166;
+            193 90  99;
+            94  60  108;
+            157 188 64;
+            224 163 46;
+
+            56  61  150;
+            70  148 73;
+            175 54  60;
+            231 199 31;
+            187 86  149;
+            8   133 161;
+
+            243 243 242;
+            200 200 200;
+            160 160 160;
+            122 122 121;
+            85  85  85;
+            52  52  52];
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = LightSim
+
+            <span class="comment">%</span>
+            <span class="comment">% get column-reflectance data</span>
+            <span class="comment">%</span>
+            datapath = sprintf(<span class="string">'%s/%s'</span>,LightSim.classpath,<span class="string">'col_spec.mat'</span>);
+            load(datapath,<span class="string">'col_spec'</span>);
+            obj.col_spec = col_spec;
+
+            <span class="comment">%</span>
+            <span class="comment">% get previous measurement data</span>
+            <span class="comment">%</span>
+            datapath = sprintf(<span class="string">'%s/%s'</span>,LightSim.classpath,<span class="string">'spd_max.mat'</span>);
+            load(datapath,<span class="string">'spd_m*'</span>);
+            obj.spd_max = spd_max;
+            obj.spd_min = spd_min;
+            obj.spd_max_date = spd_max_date;
+            obj.spd_min_date = spd_min_date;
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> colorchecker_test_temp (obj,ol,cs,disp,vec_filename)
+            <span class="comment">%</span>
+            <span class="comment">% added pause for CCK measurement</span>
+            <span class="comment">%</span>
+            spd_disp_24 = {};
+            spd_ol490_24 = {};
+
+            clf
+            <span class="keyword">for</span> i = 1:24
+                subplot(4,6,i)
+                [spd_disp spd_ol490] = obj.compare_disp_ol490(ol,cs,disp,vec_filename,obj.colorchecker_rgb(i,:));
+                spd_disp_24{i} = spd_disp;
+                spd_ol490_24{i} = spd_ol490;
+
+                <span class="comment">%</span>
+                <span class="comment">%</span>
+                <span class="comment">%</span>
+                input(sprintf(<span class="string">'%02d:'</span>,i))
+            <span class="keyword">end</span>
+            save(<span class="string">'colorchecker_test_result_temp.mat'</span>,<span class="string">'spd_disp_24'</span>,<span class="string">'spd_ol490_24'</span>)
+
+            gh = gcf;
+            gh.Position = [680 265 1363 833];
+            saveas(gh,<span class="string">'colorchecker_test_result_temp.png'</span>)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> colorchecker_test (obj,ol,cs)
+
+            spd_rift_24 = {};
+            spd_ol490_24 = {};
+
+            clf
+            <span class="keyword">for</span> i = 1:24
+                subplot(4,6,i)
+                [spd_rift spd_ol490] = obj.compare_rift(ol,cs,obj.colorchecker_rgb(i,:));
+                spd_rift_24{i} = spd_rift;
+                spd_ol490_24{i} = spd_ol490;
+            <span class="keyword">end</span>
+            save(<span class="string">'colorchecker_test_result.mat'</span>,<span class="string">'spd_rift_24'</span>,<span class="string">'spd_ol490_24'</span>)
+
+            gh = gcf;
+            gh.Position = [680 265 1363 833];
+            saveas(gh,<span class="string">'colorchecker_test_result.png'</span>)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> rs = model_NEC (obj)
+
+            <span class="comment">% NEC PA271 Adobe</span>
+
+            nec = NECPA271Sim;
+
+            vec_r = obj.spd2vec(nec.spec_r);
+            vec_g = obj.spd2vec(nec.spec_g);
+            vec_b = obj.spd2vec(nec.spec_b);
+
+            save(<span class="string">'vec_nec'</span>,<span class="string">'vec*'</span>)
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> rs = model_HPZ24x (obj)
+            <span class="comment">% temp -- see HPZ24xSim</span>
+            sc = 0.07;
+            spec_z24x = xlsread(<span class="string">'hpz24x_rgb.csv'</span>);
+
+            spec_z24x = spec_z24x(21:end,:)'*sc;
+
+            vec_r = obj.spd2vec(spec_z24x(1,:));
+            vec_g = obj.spd2vec(spec_z24x(2,:));
+            vec_b = obj.spd2vec(spec_z24x(3,:));
+
+            save(<span class="string">'vec_hp24z'</span>,<span class="string">'vec*'</span>)
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> rs = model_rift (obj)
+            rs = RiftSim(0.08);
+
+            obj.vec_r = obj.spd2vec(rs.output([255 0 0]));
+            obj.vec_g = obj.spd2vec(rs.output([0 255 0]));
+            obj.vec_b = obj.spd2vec(rs.output([0 0 255]));
+
+            obj.rs = rs;
+        <span class="keyword">end</span>
+
+
+        <span class="keyword">function</span> dE = analyze_rift (obj)
+
+            load(<span class="string">'colorchecker_test_result.mat'</span>,<span class="string">'spd_rift_24'</span>,<span class="string">'spd_ol490_24'</span>)
+
+
+            cc = ColorConversionClass;
+
+            spec = zeros(24,41);
+            <span class="keyword">for</span> i = 1:24
+                s = spd_ol490_24{i};
+                s = s(1:10:end);
+                spec(i,:) = s;
+            <span class="keyword">end</span>
+
+            <span class="comment">% XYZ is 24x3</span>
+            XYZ_ol490 = cc.spd2XYZ(spec');
+            LAB_ol490 = cc.XYZ2lab(XYZ_ol490,XYZ_ol490(19,:));
+
+            spec = zeros(24,41);
+            <span class="keyword">for</span> i = 1:24
+                s = spd_rift_24{i};
+                s = s(1:10:end);
+                spec(i,:) = s;
+            <span class="keyword">end</span>
+
+            <span class="comment">% XYZ is 24x3</span>
+            XYZ_rift = cc.spd2XYZ(spec');
+            LAB_rift = cc.XYZ2lab(XYZ_rift,XYZ_rift(19,:));
+
+            <span class="keyword">for</span> i = 1:24
+                [dE00 dE94 dEab] = cc.LAB2dE(LAB_rift(i,:)',LAB_ol490(i,:)');
+                dE(i) = dE00;
+            <span class="keyword">end</span>
+            <span class="string">'oh'</span>
+        <span class="keyword">end</span>
+
+
+        <span class="keyword">function</span> compare_primary (obj,ol,cs,vec_filename,dispsim)
+            load(vec_filename)
+
+            <span class="comment">% lit the light</span>
+            spd_ol490_r = obj.test_vec(ol,cs,vec_r);
+            spd_ol490_g = obj.test_vec(ol,cs,vec_g);
+            spd_ol490_b = obj.test_vec(ol,cs,vec_b);
+
+            clf
+            hold <span class="string">on</span>
+            plot(380:780,spd_ol490_r,<span class="string">':r'</span>)
+            plot(380:780,dispsim.spec_r,<span class="string">'r'</span>)
+            plot(380:780,spd_ol490_g,<span class="string">':g'</span>)
+            plot(380:780,dispsim.spec_g,<span class="string">'g'</span>)
+            plot(380:780,spd_ol490_b,<span class="string">':b'</span>)
+            plot(380:780,dispsim.spec_b,<span class="string">'b'</span>)
+
+            save(<span class="string">'primary_results'</span>,<span class="string">'spd_*'</span>)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [spd_disp spd_ol490] = compare_disp_ol490 (obj,ol,cs,disp,vec_filename,rgb)
+
+            <span class="comment">% obtain linear RGB on Rift</span>
+            [spd_disp rgb_lin] = disp.rgb2spec(rgb);
+
+            <span class="comment">% get pre-calculated vectors for Rift primaries</span>
+            load(vec_filename,<span class="string">'vec_r'</span>,<span class="string">'vec_g'</span>,<span class="string">'vec_b'</span>)
+
+            <span class="comment">% assume additivity</span>
+            vec = vec_r * rgb_lin(1) + vec_g * rgb_lin(2) + vec_b * rgb_lin(3);
+            vec = max(0,vec);
+            vec = min(1,vec);
+
+            <span class="comment">% lit the light</span>
+            spd_ol490 = obj.test_vec(ol,cs,vec);
+
+            <span class="comment">%clf</span>
+            hold <span class="string">on</span>
+            plot(380:780,spd_disp)
+            plot(380:780,spd_ol490)
+            legend(<span class="string">'Display'</span>,<span class="string">'OL490'</span>)
+            axis([380 780 0 3e-4])
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [spd_rift spd_ol490] = compare_rift (obj,ol,cs,rgb)
+
+            <span class="comment">% obtain linear RGB on Rift</span>
+            rgb_lin = obj.rs.gamma(rgb);
+
+            <span class="comment">% get pre-calculated vectors for Rift primaries</span>
+            <span class="comment">% load('rift_vec','vec_r','vec_g','vec_b')</span>
+
+            <span class="comment">% assume additivity</span>
+            vec = obj.vec_r * rgb_lin(1) + obj.vec_g * rgb_lin(2) + obj.vec_b * rgb_lin(3);
+
+            <span class="comment">% lit the light</span>
+            spd_ol490 = obj.test_vec(ol,cs,vec);
+
+            <span class="comment">% pre-determined earlier</span>
+            spd_rift = obj.rs.output(rgb);
+
+            hold <span class="string">on</span>
+            plot(380:780,spd_rift)
+            plot(380:780,spd_ol490)
+            legend(<span class="string">'Rift'</span>,<span class="string">'OL490'</span>)
+            axis([380 780 0 3e-4])
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> spd = test_vec (obj,ol,cs,vec)
+            ol.setColumn1024Gamma(vec);
+            mea = cs.measure;
+            spd = mea.amplitude;
+
+            <span class="keyword">if</span> 0
+                clf
+                mea.plot
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> vec = spd2vec (obj,spd_target)
+            <span class="comment">% find the linear vector to generate spd</span>
+
+            <span class="keyword">if</span> ~(size(spd_target,1)==401 &amp;&amp; size(spd_target,2)==1)
+                spd_target = spd_target';
+            <span class="keyword">end</span>
+
+            <span class="comment">% need to be vertical</span>
+            assert(size(spd_target,1)==401 &amp;&amp; size(spd_target,2)==1);
+
+            <span class="comment">% visualize</span>
+            <span class="keyword">if</span> 0
+                clf
+                hold <span class="string">on</span>
+                plot(380:780,obj.spd_max)
+                plot(380:780,spd_target)
+                legend(<span class="string">'spd max'</span>,<span class="string">'spd target'</span>)
+                title(<span class="string">'Check the target spd'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% calcualte the reflectance</span>
+            <span class="comment">%</span>
+            ref_target_orig = (spd_target - obj.spd_min) ./ (obj.spd_max - obj.spd_min);
+            ref_target = min(1,ref_target_orig);
+            ref_target = max(0,ref_target);
+
+            <span class="comment">% visualize</span>
+            <span class="keyword">if</span> 0
+                clf
+                hold <span class="string">on</span>
+                plot(ref_target_orig)
+                plot(ref_target)
+                title(<span class="string">'Check target reflectance'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% solve the equation with R</span>
+            <span class="comment">%</span>
+            ref_m = obj.col_spec';
+            rsolve = Rsolver(ref_m,ref_target);
+
+            vec_orig = rsolve.A;
+
+            <span class="comment">%            vec_orig = R_callRsolver1024(ref_m,ref_target);</span>
+            <span class="keyword">if</span> 0
+                load(<span class="string">'vec'</span>,<span class="string">'vec'</span>)
+                vec_orig = vec;
+            <span class="keyword">end</span>
+
+            <span class="comment">% limit to [0,1]</span>
+            vec = vec_orig;
+            vec = min(1,vec);
+            vec = max(0,vec);
+
+            <span class="comment">% visualize the vector</span>
+            <span class="keyword">if</span> 0
+                clf
+                plot(vec)
+                title(<span class="string">'Check the vector given by R'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">% predict the reflectance</span>
+            ref_predicted = obj.vec2ref(vec);
+
+            <span class="comment">% visualize</span>
+            <span class="keyword">if</span> 0
+                clf
+                hold <span class="string">on</span>
+                plot(ref_target)
+                plot(ref_predicted)
+                legend(<span class="string">'target'</span>,<span class="string">'predicted'</span>)
+                title(<span class="string">'Check predicted reflectance'</span>)
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> ref_predicted = vec2ref (obj,vec)
+            <span class="comment">% predict the reflectance with linear vector</span>
+
+            ref_predicted = obj.col_spec' * vec + (obj.spd_min ./ obj.spd_max);
+
+            <span class="comment">% visualize</span>
+            <span class="keyword">if</span> 0
+                clf
+                plot(ref_predicted)
+                title(<span class="string">'Check predicted reflectance'</span>)
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="comment">%         function construct_vec_8_pencils (obj)</span>
+        <span class="comment">%</span>
+        <span class="comment">%             col_center = [72 202 327 454 583 708 834 956];</span>
+        <span class="comment">%             wl_center = [400 450 500 550 600 650 700 750];</span>
+        <span class="comment">%</span>
+        <span class="comment">%             col_n = length(col_center);</span>
+        <span class="comment">%             col_width = 0;</span>
+        <span class="comment">%</span>
+        <span class="comment">%             col_array = zeros(col_n,1024);</span>
+        <span class="comment">%             for i = 1:col_n</span>
+        <span class="comment">%                 c_center = col_center(i);</span>
+        <span class="comment">%                 col_array(i,c_center-col_width:c_center+col_width) = 1;</span>
+        <span class="comment">%             end</span>
+        <span class="comment">%</span>
+        <span class="comment">%             obj.vec_8_pencils = col_array;</span>
+        <span class="comment">%             obj.vec_8_wl = wl_center;</span>
+        <span class="comment">%</span>
+        <span class="comment">%         end</span>
+
+        <span class="comment">%         function construct_vec_8_spikes (obj)</span>
+        <span class="comment">%</span>
+        <span class="comment">%             col_center = [72 202 327 454 583 708 834 956];</span>
+        <span class="comment">%             wl_center = [400 450 500 550 600 650 700 750];</span>
+        <span class="comment">%</span>
+        <span class="comment">%             col_n = length(col_center);</span>
+        <span class="comment">%             col_width = 25;</span>
+        <span class="comment">%</span>
+        <span class="comment">%             col_array = zeros(col_n,1024);</span>
+        <span class="comment">%             for i = 1:col_n</span>
+        <span class="comment">%                 c_center = col_center(i);</span>
+        <span class="comment">%                 col_array(i,c_center-col_width:c_center+col_width) = 1;</span>
+        <span class="comment">%             end</span>
+        <span class="comment">%</span>
+        <span class="comment">%             obj.vec_8_spikes = col_array;</span>
+        <span class="comment">%             obj.vec_8_wl = wl_center;</span>
+        <span class="comment">%</span>
+        <span class="comment">%         end</span>
+
+        <span class="keyword">function</span> sout = predict_col_spec (obj, vec, spec_max)
+            <span class="comment">% Predict the output spd with vector based on the maximum light</span>
+            <span class="comment">% vec: 1x1024</span>
+            <span class="comment">% sout: OL490 spectrum</span>
+
+            assert(length(vec)==1024);
+
+            spec_vec = obj.col_spec';
+            reflectance_total = spec_vec * vec;
+            spd_reflected = spec_max .* reflectance_total;
+
+            sout = spd_reflected + obj.spd_0';
+
+            <span class="keyword">return</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> update_max (obj,ol,cs)
+            <span class="comment">% Measure the maximum light</span>
+            c_range = 1:1024;
+            vec = LightSim.multiple_peaks(c_range);
+            ol.setColumn1024(vec)
+            mea = cs.measure;
+            obj.spd_max = mea.amplitude;
+            obj.spd_max_date = datetime;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> update_min (obj,ol,cs)
+            <span class="comment">% Measure the maximum light</span>
+            c_range = [];
+            vec = LightSim.multiple_peaks(c_range);
+            ol.setColumn1024(vec)
+            mea = cs.measure;
+            obj.spd_min = mea.amplitude;
+            obj.spd_min_date = datetime;
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+
+
+
+    <span class="keyword">methods</span> (Static)
+
+        <span class="keyword">function</span> evaluate_test_nec
+
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_nec.mat'</span>;
+            fn_cl500a = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_nec.xlsx'</span>;
+            fn_i1 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\i1data_nec.mat'</span>;
+
+            data_cs2000 = DeviceData;
+            data_cl500a = DeviceData;
+            data_i1 = DeviceData;
+            data_lightsim = DeviceData;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_i1.construct_by_i1(fn_i1)
+
+            cpr = ColorPerformanceReview;
+
+            a = data_cs2000;
+            b = data_i1;
+
+            <span class="comment">%cpr.evaluate_visual(a,b);</span>
+           <span class="comment">%cpr.evaluate_order(a,b);</span>
+                      cpr.show3dquiver(a,b);
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_cl500a_hp
+            data_cl500a = DeviceData;
+            data_cs2000 = DeviceData;
+
+            fn_cl500a = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_hp.xlsx'</span>;
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\colorchecker_test_result_hp.mat'</span>;
+
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+
+            clf
+            data_cl500a.compare_with_ref(data_cs2000,0)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_cl500a_nec
+            data_cl500a = DeviceData;
+            data_cs2000 = DeviceData;
+
+            fn_cl500a = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_nec.xlsx'</span>;
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\colorchecker_test_result_nec.mat'</span>;
+
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+
+            clf
+            data_cl500a.compare_with_ref(data_cs2000,0)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_i1_nec
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\colorchecker_test_result_nec.mat'</span>;
+            fn_i1 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\i1data_nec.mat'</span>;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_i1_hp
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\hp_i1_0608\colorchecker_test_result_hp.mat'</span>;
+            fn_i1 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\hp_i1_0608\i1data_hp.mat'</span>;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_i1_rift
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\rift_i1_0608\colorchecker_test_result_rift.mat'</span>;
+            fn_i1 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\rift_i1_0608\i1data_rift.mat'</span>;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+
+                        <span class="string">'hi'</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_LightSim_rift
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_rift.mat'</span>;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+
+            <span class="string">'hi'</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_LightSim_hp
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_hp.mat'</span>;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> evaluate_spec_LightSim_nec
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+
+            fn_cs2000 = <span class="string">'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_nec.mat'</span>;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+        <span class="keyword">end</span>
+
+
+        <span class="comment">%</span>
+        <span class="comment">% find the peak of a single spike in a spectrum</span>
+        <span class="comment">%</span>
+        <span class="keyword">function</span> [x y z] = find_spike (wl_tar, spec)
+
+            <span class="comment">% spec is 1x401 from OL490 output</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% convert to 780x1 as absolute wavelength</span>
+            <span class="comment">%</span>
+            t2 = zeros(780,1);
+            t2(380:780,1) = spec';
+
+            <span class="comment">% create a mask to isolate the current peak</span>
+            <span class="comment">% the spikes are 50 nm apart, so use width=25</span>
+            x_axis = 1:780;
+            width = 25;
+            mask = (x_axis &lt; wl_tar-width) | (x_axis &gt; wl_tar+width);
+            t3 = t2;
+            t3(mask) = 0;
+
+            <span class="comment">% calculate CDF</span>
+            t4 = cumsum(t3);
+
+            <span class="comment">% normalize</span>
+            t5 = t4 / max(t4);
+
+            <span class="comment">% find the mid point, defined as 50%, by linear search</span>
+            i = 1;
+            <span class="keyword">while</span> i &lt;= length(t5) &amp;&amp; t5(i) &lt; 0.5
+                i = i + 1;
+            <span class="keyword">end</span>
+
+            <span class="comment">% return values</span>
+            x = i;
+            y = t3(i);
+            z = t3(380:780);  <span class="comment">% in OL490 form</span>
+        <span class="keyword">end</span>
+
+        <span class="comment">%</span>
+        <span class="comment">% find the peaks of 8 spikes in a spectrum</span>
+        <span class="comment">%</span>
+        <span class="keyword">function</span> peaks = find_spikes (wl_target, spec)
+
+            <span class="comment">% spec is 1x401</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% convert to 780x1</span>
+            <span class="comment">%</span>
+
+            n = length(wl_target);
+            <span class="keyword">for</span> i = 1:n
+
+                <span class="comment">% the target wavelength</span>
+                wl_tar = wl_target(i);
+
+                [x y z] = LightSim.find_spike(wl_tar,spec);
+
+                peaks(i,1) = x;
+                peaks(i,2) = y;
+                peaks(i,3:3+400) = z;
+
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> col_predict = wl_column_interpolate (wl,col,wl_target)
+            <span class="comment">%</span>
+            <span class="comment">% predict column between 1 and 1024 by the look-up table</span>
+            <span class="comment">%</span>
+            col_predict = round(interp1(wl,col,wl_target,<span class="string">'spline'</span>,<span class="string">'extrap'</span>));
+            col_predict = min(col_predict,1024);
+            col_predict = max(col_predict,1);
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> vout = multiple_peaks (col_range)
+            <span class="comment">%</span>
+            <span class="comment">% generate a column vector using the column numbers</span>
+            <span class="comment">%</span>
+            v_max = 1;              <span class="comment">% max intensity</span>
+            col_width = 0;          <span class="comment">% width: only one column</span>
+
+            vout = zeros(1024,1);
+            <span class="keyword">for</span> i = 1:length(col_range)
+                col = col_range(i);
+                assert((col &gt;= 1) &amp;&amp; (col &lt;= 1024));
+                vout = LightSim.add_a_peak(vout,col,col_width,v_max);
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> vout = add_a_peak (vin, col, width, amp)
+            <span class="comment">%</span>
+            <span class="comment">% turn on one more column (+/- width) in the given vector</span>
+            <span class="comment">%</span>
+            vout = vin;
+
+            col_start = col-width;
+            col_stop = col+width;
+            <span class="comment">%</span>
+            <span class="comment">% check range</span>
+            <span class="comment">%</span>
+            col_start = max(1,col_start);
+            col_stop = min(1024,col_stop);
+
+            <span class="comment">%</span>
+            <span class="comment">% set the columns</span>
+            <span class="comment">%</span>
+            vout(col_start:col_stop,1) = amp;
+
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% LightSim: A testbed for evaluating color calibration kits
+classdef LightSim < handle
+    %%LIGHTSIM A testbed for evaluating color calibration kits
+    % Find relationship between 1024-column control and ouput spectra of OL490
+    
+    properties
+        
+        col_spec
+        spd_max
+        spd_min
+        spd_max_date
+        spd_min_date
+        
+        vec_r
+        vec_g
+        vec_b
+        
+        rs
+    end
+    
+    properties (Constant)
+        
+        % the data files are stored in the class folder
+        
+        classpath = fileparts(which('LightSim'));
+        
+        colorchecker_rgb = [115 82 68;
+            194 150 130;
+            98  122 157;
+            87  108 67;
+            133 128 177;
+            103 189 170;
+            
+            214 126 44;
+            80  91  166;
+            193 90  99;
+            94  60  108;
+            157 188 64;
+            224 163 46;
+            
+            56  61  150;
+            70  148 73;
+            175 54  60;
+            231 199 31;
+            187 86  149;
+            8   133 161;
+            
+            243 243 242;
+            200 200 200;
+            160 160 160;
+            122 122 121;
+            85  85  85;
+            52  52  52];
+    end
+    
+    methods
+        
+        function obj = LightSim
+            
+            %
+            % get column-reflectance data
+            %
+            datapath = sprintf('%s/%s',LightSim.classpath,'col_spec.mat');
+            load(datapath,'col_spec');
+            obj.col_spec = col_spec;
+            
+            %
+            % get previous measurement data
+            %
+            datapath = sprintf('%s/%s',LightSim.classpath,'spd_max.mat');
+            load(datapath,'spd_m*');
+            obj.spd_max = spd_max;
+            obj.spd_min = spd_min;
+            obj.spd_max_date = spd_max_date;
+            obj.spd_min_date = spd_min_date;
+            
+        end
+        
+        function colorchecker_test_temp (obj,ol,cs,disp,vec_filename)
+            %
+            % added pause for CCK measurement
+            %
+            spd_disp_24 = {};
+            spd_ol490_24 = {};
+            
+            clf
+            for i = 1:24
+                subplot(4,6,i)
+                [spd_disp spd_ol490] = obj.compare_disp_ol490(ol,cs,disp,vec_filename,obj.colorchecker_rgb(i,:));
+                spd_disp_24{i} = spd_disp;
+                spd_ol490_24{i} = spd_ol490;
+                
+                %
+                %
+                %
+                input(sprintf('%02d:',i))
+            end
+            save('colorchecker_test_result_temp.mat','spd_disp_24','spd_ol490_24')
+            
+            gh = gcf;
+            gh.Position = [680 265 1363 833];
+            saveas(gh,'colorchecker_test_result_temp.png')
+        end
+        
+        function colorchecker_test (obj,ol,cs)
+            
+            spd_rift_24 = {};
+            spd_ol490_24 = {};
+            
+            clf
+            for i = 1:24
+                subplot(4,6,i)
+                [spd_rift spd_ol490] = obj.compare_rift(ol,cs,obj.colorchecker_rgb(i,:));
+                spd_rift_24{i} = spd_rift;
+                spd_ol490_24{i} = spd_ol490;
+            end
+            save('colorchecker_test_result.mat','spd_rift_24','spd_ol490_24')
+            
+            gh = gcf;
+            gh.Position = [680 265 1363 833];
+            saveas(gh,'colorchecker_test_result.png')
+        end
+        
+        function rs = model_NEC (obj)
+            
+            % NEC PA271 Adobe
+            
+            nec = NECPA271Sim;
+            
+            vec_r = obj.spd2vec(nec.spec_r);
+            vec_g = obj.spd2vec(nec.spec_g);
+            vec_b = obj.spd2vec(nec.spec_b);
+            
+            save('vec_nec','vec*')
+            
+        end
+        
+        function rs = model_HPZ24x (obj)
+            % temp REPLACE_WITH_DASH_DASH see HPZ24xSim
+            sc = 0.07;
+            spec_z24x = xlsread('hpz24x_rgb.csv');
+            
+            spec_z24x = spec_z24x(21:end,:)'*sc;
+            
+            vec_r = obj.spd2vec(spec_z24x(1,:));
+            vec_g = obj.spd2vec(spec_z24x(2,:));
+            vec_b = obj.spd2vec(spec_z24x(3,:));
+            
+            save('vec_hp24z','vec*')
+            
+        end
+        
+        function rs = model_rift (obj)
+            rs = RiftSim(0.08);
+            
+            obj.vec_r = obj.spd2vec(rs.output([255 0 0]));
+            obj.vec_g = obj.spd2vec(rs.output([0 255 0]));
+            obj.vec_b = obj.spd2vec(rs.output([0 0 255]));
+            
+            obj.rs = rs;
+        end
+        
+        
+        function dE = analyze_rift (obj)
+            
+            load('colorchecker_test_result.mat','spd_rift_24','spd_ol490_24')
+            
+            
+            cc = ColorConversionClass;
+            
+            spec = zeros(24,41);
+            for i = 1:24
+                s = spd_ol490_24{i};
+                s = s(1:10:end);
+                spec(i,:) = s;
+            end
+            
+            % XYZ is 24x3
+            XYZ_ol490 = cc.spd2XYZ(spec');
+            LAB_ol490 = cc.XYZ2lab(XYZ_ol490,XYZ_ol490(19,:));
+            
+            spec = zeros(24,41);
+            for i = 1:24
+                s = spd_rift_24{i};
+                s = s(1:10:end);
+                spec(i,:) = s;
+            end
+            
+            % XYZ is 24x3
+            XYZ_rift = cc.spd2XYZ(spec');
+            LAB_rift = cc.XYZ2lab(XYZ_rift,XYZ_rift(19,:));
+            
+            for i = 1:24
+                [dE00 dE94 dEab] = cc.LAB2dE(LAB_rift(i,:)',LAB_ol490(i,:)');
+                dE(i) = dE00;
+            end
+            'oh'
+        end
+        
+        
+        function compare_primary (obj,ol,cs,vec_filename,dispsim)
+            load(vec_filename)
+            
+            % lit the light
+            spd_ol490_r = obj.test_vec(ol,cs,vec_r);
+            spd_ol490_g = obj.test_vec(ol,cs,vec_g);
+            spd_ol490_b = obj.test_vec(ol,cs,vec_b);
+            
+            clf
+            hold on
+            plot(380:780,spd_ol490_r,':r')
+            plot(380:780,dispsim.spec_r,'r')
+            plot(380:780,spd_ol490_g,':g')
+            plot(380:780,dispsim.spec_g,'g')
+            plot(380:780,spd_ol490_b,':b')
+            plot(380:780,dispsim.spec_b,'b')
+            
+            save('primary_results','spd_*')
+        end
+        
+        function [spd_disp spd_ol490] = compare_disp_ol490 (obj,ol,cs,disp,vec_filename,rgb)
+            
+            % obtain linear RGB on Rift
+            [spd_disp rgb_lin] = disp.rgb2spec(rgb);
+            
+            % get pre-calculated vectors for Rift primaries
+            load(vec_filename,'vec_r','vec_g','vec_b')
+            
+            % assume additivity
+            vec = vec_r * rgb_lin(1) + vec_g * rgb_lin(2) + vec_b * rgb_lin(3);
+            vec = max(0,vec);
+            vec = min(1,vec);
+            
+            % lit the light
+            spd_ol490 = obj.test_vec(ol,cs,vec);
+            
+            %clf
+            hold on
+            plot(380:780,spd_disp)
+            plot(380:780,spd_ol490)
+            legend('Display','OL490')
+            axis([380 780 0 3e-4])
+            
+        end
+        
+        function [spd_rift spd_ol490] = compare_rift (obj,ol,cs,rgb)
+            
+            % obtain linear RGB on Rift
+            rgb_lin = obj.rs.gamma(rgb);
+            
+            % get pre-calculated vectors for Rift primaries
+            % load('rift_vec','vec_r','vec_g','vec_b')
+            
+            % assume additivity
+            vec = obj.vec_r * rgb_lin(1) + obj.vec_g * rgb_lin(2) + obj.vec_b * rgb_lin(3);
+            
+            % lit the light
+            spd_ol490 = obj.test_vec(ol,cs,vec);
+            
+            % pre-determined earlier
+            spd_rift = obj.rs.output(rgb);
+            
+            hold on
+            plot(380:780,spd_rift)
+            plot(380:780,spd_ol490)
+            legend('Rift','OL490')
+            axis([380 780 0 3e-4])
+            
+        end
+        
+        function spd = test_vec (obj,ol,cs,vec)
+            ol.setColumn1024Gamma(vec);
+            mea = cs.measure;
+            spd = mea.amplitude;
+            
+            if 0
+                clf
+                mea.plot
+            end
+        end
+        
+        function vec = spd2vec (obj,spd_target)
+            % find the linear vector to generate spd
+            
+            if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
+                spd_target = spd_target';
+            end
+            
+            % need to be vertical
+            assert(size(spd_target,1)==401 && size(spd_target,2)==1);
+            
+            % visualize
+            if 0
+                clf
+                hold on
+                plot(380:780,obj.spd_max)
+                plot(380:780,spd_target)
+                legend('spd max','spd target')
+                title('Check the target spd')
+            end
+            
+            %
+            % calcualte the reflectance
+            %
+            ref_target_orig = (spd_target - obj.spd_min) ./ (obj.spd_max - obj.spd_min);
+            ref_target = min(1,ref_target_orig);
+            ref_target = max(0,ref_target);
+            
+            % visualize
+            if 0
+                clf
+                hold on
+                plot(ref_target_orig)
+                plot(ref_target)
+                title('Check target reflectance')
+            end
+            
+            %
+            % solve the equation with R
+            %
+            ref_m = obj.col_spec';
+            rsolve = Rsolver(ref_m,ref_target);
+            
+            vec_orig = rsolve.A;
+            
+            %            vec_orig = R_callRsolver1024(ref_m,ref_target);
+            if 0
+                load('vec','vec')
+                vec_orig = vec;
+            end
+            
+            % limit to [0,1]
+            vec = vec_orig;
+            vec = min(1,vec);
+            vec = max(0,vec);
+            
+            % visualize the vector
+            if 0
+                clf
+                plot(vec)
+                title('Check the vector given by R')
+            end
+            
+            % predict the reflectance
+            ref_predicted = obj.vec2ref(vec);
+            
+            % visualize
+            if 0
+                clf
+                hold on
+                plot(ref_target)
+                plot(ref_predicted)
+                legend('target','predicted')
+                title('Check predicted reflectance')
+            end
+            
+        end
+        
+        function ref_predicted = vec2ref (obj,vec)
+            % predict the reflectance with linear vector
+            
+            ref_predicted = obj.col_spec' * vec + (obj.spd_min ./ obj.spd_max);
+            
+            % visualize
+            if 0
+                clf
+                plot(ref_predicted)
+                title('Check predicted reflectance')
+            end
+            
+        end
+        
+        %         function construct_vec_8_pencils (obj)
+        %
+        %             col_center = [72 202 327 454 583 708 834 956];
+        %             wl_center = [400 450 500 550 600 650 700 750];
+        %
+        %             col_n = length(col_center);
+        %             col_width = 0;
+        %
+        %             col_array = zeros(col_n,1024);
+        %             for i = 1:col_n
+        %                 c_center = col_center(i);
+        %                 col_array(i,c_center-col_width:c_center+col_width) = 1;
+        %             end
+        %
+        %             obj.vec_8_pencils = col_array;
+        %             obj.vec_8_wl = wl_center;
+        %
+        %         end
+        
+        %         function construct_vec_8_spikes (obj)
+        %
+        %             col_center = [72 202 327 454 583 708 834 956];
+        %             wl_center = [400 450 500 550 600 650 700 750];
+        %
+        %             col_n = length(col_center);
+        %             col_width = 25;
+        %
+        %             col_array = zeros(col_n,1024);
+        %             for i = 1:col_n
+        %                 c_center = col_center(i);
+        %                 col_array(i,c_center-col_width:c_center+col_width) = 1;
+        %             end
+        %
+        %             obj.vec_8_spikes = col_array;
+        %             obj.vec_8_wl = wl_center;
+        %
+        %         end
+        
+        function sout = predict_col_spec (obj, vec, spec_max)
+            % Predict the output spd with vector based on the maximum light
+            % vec: 1x1024
+            % sout: OL490 spectrum
+            
+            assert(length(vec)==1024);
+            
+            spec_vec = obj.col_spec';
+            reflectance_total = spec_vec * vec;
+            spd_reflected = spec_max .* reflectance_total;
+            
+            sout = spd_reflected + obj.spd_0';
+            
+            return
+            
+        end
+        
+        function update_max (obj,ol,cs)
+            % Measure the maximum light
+            c_range = 1:1024;
+            vec = LightSim.multiple_peaks(c_range);
+            ol.setColumn1024(vec)
+            mea = cs.measure;
+            obj.spd_max = mea.amplitude;
+            obj.spd_max_date = datetime;
+        end
+        
+        function update_min (obj,ol,cs)
+            % Measure the maximum light
+            c_range = [];
+            vec = LightSim.multiple_peaks(c_range);
+            ol.setColumn1024(vec)
+            mea = cs.measure;
+            obj.spd_min = mea.amplitude;
+            obj.spd_min_date = datetime;
+        end
+        
+    end
+    
+    
+    
+    methods (Static)
+        
+        function evaluate_test_nec
+
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_nec.mat';
+            fn_cl500a = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_nec.xlsx';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\i1data_nec.mat';
+
+            data_cs2000 = DeviceData;
+            data_cl500a = DeviceData;
+            data_i1 = DeviceData;            
+            data_lightsim = DeviceData;
+
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_i1.construct_by_i1(fn_i1)
+            
+            cpr = ColorPerformanceReview;
+
+            a = data_cs2000;
+            b = data_i1;
+            
+            %cpr.evaluate_visual(a,b);
+           %cpr.evaluate_order(a,b); 
+                      cpr.show3dquiver(a,b); 
+        end
+        
+        function evaluate_spec_cl500a_hp
+            data_cl500a = DeviceData;
+            data_cs2000 = DeviceData;
+            
+            fn_cl500a = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_hp.xlsx';
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\colorchecker_test_result_hp.mat';
+            
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            
+            clf
+            data_cl500a.compare_with_ref(data_cs2000,0)
+        end
+        
+        function evaluate_spec_cl500a_nec
+            data_cl500a = DeviceData;
+            data_cs2000 = DeviceData;
+            
+            fn_cl500a = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\CL500a_nec.xlsx';
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\cl500a_0608\colorchecker_test_result_nec.mat';
+            
+            data_cl500a.construct_by_CL500a(fn_cl500a);
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            
+            clf
+            data_cl500a.compare_with_ref(data_cs2000,0)
+        end
+        
+        function evaluate_spec_i1_nec
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\colorchecker_test_result_nec.mat';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\nec_i1_0608\i1data_nec.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+            
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+        end
+
+        function evaluate_spec_i1_hp
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\hp_i1_0608\colorchecker_test_result_hp.mat';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\hp_i1_0608\i1data_hp.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+            
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+        end
+        
+        function evaluate_spec_i1_rift
+            data_cs2000 = DeviceData;
+            data_i1 = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\rift_i1_0608\colorchecker_test_result_rift.mat';
+            fn_i1 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\rift_i1_0608\i1data_rift.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_i1.construct_by_i1(fn_i1)
+            
+            clf
+            data_i1.compare_with_ref(data_cs2000,4000)
+            
+                        'hi'
+        end
+        
+        function evaluate_spec_LightSim_rift
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_rift.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+            
+            'hi'
+        end
+        
+        function evaluate_spec_LightSim_hp
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_hp.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+        end
+
+        function evaluate_spec_LightSim_nec
+            data_cs2000 = DeviceData;
+            data_lightsim = DeviceData;
+            
+            fn_cs2000 = 'C:\Users\Wuchihlei\Documents\GitHub\MIS_acquire\@LightSim\0605\colorchecker_test_result_nec.mat';
+            
+            data_cs2000.construct_by_cs2000(fn_cs2000);
+            data_lightsim.construct_by_target(fn_cs2000)
+            
+            clf
+            data_lightsim.compare_with_ref(data_cs2000)
+        end
+
+        
+        %
+        % find the peak of a single spike in a spectrum
+        %
+        function [x y z] = find_spike (wl_tar, spec)
+            
+            % spec is 1x401 from OL490 output
+            
+            %
+            % convert to 780x1 as absolute wavelength
+            %
+            t2 = zeros(780,1);
+            t2(380:780,1) = spec';
+            
+            % create a mask to isolate the current peak
+            % the spikes are 50 nm apart, so use width=25
+            x_axis = 1:780;
+            width = 25;
+            mask = (x_axis < wl_tar-width) | (x_axis > wl_tar+width);
+            t3 = t2;
+            t3(mask) = 0;
+            
+            % calculate CDF
+            t4 = cumsum(t3);
+            
+            % normalize
+            t5 = t4 / max(t4);
+            
+            % find the mid point, defined as 50%, by linear search
+            i = 1;
+            while i <= length(t5) && t5(i) < 0.5
+                i = i + 1;
+            end
+            
+            % return values
+            x = i;
+            y = t3(i);
+            z = t3(380:780);  % in OL490 form
+        end
+        
+        %
+        % find the peaks of 8 spikes in a spectrum
+        %
+        function peaks = find_spikes (wl_target, spec)
+            
+            % spec is 1x401
+            
+            %
+            % convert to 780x1
+            %
+            
+            n = length(wl_target);
+            for i = 1:n
+                
+                % the target wavelength
+                wl_tar = wl_target(i);
+                
+                [x y z] = LightSim.find_spike(wl_tar,spec);
+                
+                peaks(i,1) = x;
+                peaks(i,2) = y;
+                peaks(i,3:3+400) = z;
+                
+            end
+            
+        end
+        
+        function col_predict = wl_column_interpolate (wl,col,wl_target)
+            %
+            % predict column between 1 and 1024 by the look-up table
+            %
+            col_predict = round(interp1(wl,col,wl_target,'spline','extrap'));
+            col_predict = min(col_predict,1024);
+            col_predict = max(col_predict,1);
+            
+        end
+        
+        function vout = multiple_peaks (col_range)
+            %
+            % generate a column vector using the column numbers
+            %
+            v_max = 1;              % max intensity
+            col_width = 0;          % width: only one column
+            
+            vout = zeros(1024,1);
+            for i = 1:length(col_range)
+                col = col_range(i);
+                assert((col >= 1) && (col <= 1024));
+                vout = LightSim.add_a_peak(vout,col,col_width,v_max);
+            end
+            
+        end
+        
+        function vout = add_a_peak (vin, col, width, amp)
+            %
+            % turn on one more column (+/- width) in the given vector
+            %
+            vout = vin;
+            
+            col_start = col-width;
+            col_stop = col+width;
+            %
+            % check range
+            %
+            col_start = max(1,col_start);
+            col_stop = min(1024,col_stop);
+            
+            %
+            % set the columns
+            %
+            vout(col_start:col_stop,1) = amp;
+            
+        end
+        
+    end
+    
+end
+
+
+##### SOURCE END #####
+--></body></html>

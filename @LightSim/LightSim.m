@@ -1,19 +1,17 @@
+%% LightSim: A testbed for evaluating color calibration kits
 classdef LightSim < handle
+    %%LIGHTSIM A testbed for evaluating color calibration kits
     % Find relationship between 1024-column control and ouput spectra of OL490
     
     properties
         
-        col_spec
-        spd_max
-        spd_min
-        spd_max_date
-        spd_min_date
-        
-        vec_r
-        vec_g
-        vec_b
-        
-        rs
+        col_spec              % reflectance lookup table 1024x401 for R
+
+        spd_max               % last measured max
+        spd_min               % last measured min   
+        spd_max_date          % last measured max  
+        spd_min_date          % last measured min   
+
     end
     
     properties (Constant)
@@ -22,7 +20,7 @@ classdef LightSim < handle
         
         classpath = fileparts(which('LightSim'));
         
-        colorchecker_rgb = [115 82 68;
+        colorchecker_rgb = [115 82 68;         % ColorChecker standard RGB values
             194 150 130;
             98  122 157;
             87  108 67;
@@ -48,13 +46,14 @@ classdef LightSim < handle
             160 160 160;
             122 122 121;
             85  85  85;
-            52  52  52];
+            52  52  52]; 
     end
     
     methods
         
         function obj = LightSim
-            
+            %%LIGHTSIM Load the reflectance matrix and Lmax,Lmin
+
             %
             % get column-reflectance data
             %
@@ -67,6 +66,7 @@ classdef LightSim < handle
             %
             datapath = sprintf('%s/%s',LightSim.classpath,'spd_max.mat');
             load(datapath,'spd_m*');
+
             obj.spd_max = spd_max;
             obj.spd_min = spd_min;
             obj.spd_max_date = spd_max_date;
@@ -75,6 +75,8 @@ classdef LightSim < handle
         end
         
         function colorchecker_test_temp (obj,ol,cs,disp,vec_filename)
+            %%COLORCHECKER_TEST_TEMP main loop for testing CCKs
+            
             %
             % added pause for CCK measurement
             %
@@ -120,8 +122,8 @@ classdef LightSim < handle
         end
         
         function rs = model_NEC (obj)
-            
-            % NEC PA271 Adobe
+            %%MODEL_NEC Calculate the OL490 vector for emulating the display
+            % NEC PA271 AdobeRGB mode
             
             nec = NECPA271Sim;
             
@@ -130,25 +132,27 @@ classdef LightSim < handle
             vec_b = obj.spd2vec(nec.spec_b);
             
             save('vec_nec','vec*')
-            
         end
         
         function rs = model_HPZ24x (obj)
+            %%MODEL_HPZ24x Calculate the OL490 vector for emulating the display
             % temp -- see HPZ24xSim
+
             sc = 0.07;
             spec_z24x = xlsread('hpz24x_rgb.csv');
-            
+
             spec_z24x = spec_z24x(21:end,:)'*sc;
-            
+
             vec_r = obj.spd2vec(spec_z24x(1,:));
             vec_g = obj.spd2vec(spec_z24x(2,:));
             vec_b = obj.spd2vec(spec_z24x(3,:));
-            
+
             save('vec_hp24z','vec*')
-            
         end
         
         function rs = model_rift (obj)
+            %%MODEL_RIFT Calculate the OL490 vector for emulating the display
+            
             rs = RiftSim(0.08);
             
             obj.vec_r = obj.spd2vec(rs.output([255 0 0]));
@@ -424,7 +428,8 @@ classdef LightSim < handle
         end
         
         function update_max (obj,ol,cs)
-            % Measure the maximum light
+            %%UPDATE_MAX Measure the maximum light
+
             c_range = 1:1024;
             vec = LightSim.multiple_peaks(c_range);
             ol.setColumn1024(vec)
@@ -434,7 +439,8 @@ classdef LightSim < handle
         end
         
         function update_min (obj,ol,cs)
-            % Measure the maximum light
+            %%UPDATE_MIN Measure the minimum light
+
             c_range = [];
             vec = LightSim.multiple_peaks(c_range);
             ol.setColumn1024(vec)
@@ -682,6 +688,9 @@ classdef LightSim < handle
         end
         
         function vout = add_a_peak (vin, col, width, amp)
+            %%add_a_peak Add one section of columns into a 1024 vector
+            % 
+
             %
             % turn on one more column (+/- width) in the given vector
             %
