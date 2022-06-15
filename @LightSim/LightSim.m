@@ -58,6 +58,9 @@ classdef LightSim < handle
             % get column-reflectance data
             %
             datapath = sprintf('%s/%s',LightSim.classpath,'col_spec.mat');
+                       
+            datapath = sprintf('%s/%s',LightSim.classpath,'col_spec_0615.mat'); % HIMS2
+
             load(datapath,'col_spec');
             obj.col_spec = col_spec;
             
@@ -377,43 +380,43 @@ classdef LightSim < handle
             
         end
         
-        %         function construct_vec_8_pencils (obj)
-        %
-        %             col_center = [72 202 327 454 583 708 834 956];
-        %             wl_center = [400 450 500 550 600 650 700 750];
-        %
-        %             col_n = length(col_center);
-        %             col_width = 0;
-        %
-        %             col_array = zeros(col_n,1024);
-        %             for i = 1:col_n
-        %                 c_center = col_center(i);
-        %                 col_array(i,c_center-col_width:c_center+col_width) = 1;
-        %             end
-        %
-        %             obj.vec_8_pencils = col_array;
-        %             obj.vec_8_wl = wl_center;
-        %
-        %         end
+                function construct_vec_8_pencils (obj)
         
-        %         function construct_vec_8_spikes (obj)
-        %
-        %             col_center = [72 202 327 454 583 708 834 956];
-        %             wl_center = [400 450 500 550 600 650 700 750];
-        %
-        %             col_n = length(col_center);
-        %             col_width = 25;
-        %
-        %             col_array = zeros(col_n,1024);
-        %             for i = 1:col_n
-        %                 c_center = col_center(i);
-        %                 col_array(i,c_center-col_width:c_center+col_width) = 1;
-        %             end
-        %
-        %             obj.vec_8_spikes = col_array;
-        %             obj.vec_8_wl = wl_center;
-        %
-        %         end
+                    col_center = [72 202 327 454 583 708 834 956];
+                    wl_center = [400 450 500 550 600 650 700 750];
+        
+                    col_n = length(col_center);
+                    col_width = 0;
+        
+                    col_array = zeros(col_n,1024);
+                    for i = 1:col_n
+                        c_center = col_center(i);
+                        col_array(i,c_center-col_width:c_center+col_width) = 1;
+                    end
+        
+                    obj.vec_8_pencils = col_array;
+                    obj.vec_8_wl = wl_center;
+        
+                end
+        
+                function construct_vec_8_spikes (obj)
+        
+                    col_center = [72 202 327 454 583 708 834 956];
+                    wl_center = [400 450 500 550 600 650 700 750];
+        
+                    col_n = length(col_center);
+                    col_width = 25;
+        
+                    col_array = zeros(col_n,1024);
+                    for i = 1:col_n
+                        c_center = col_center(i);
+                        col_array(i,c_center-col_width:c_center+col_width) = 1;
+                    end
+        
+                    obj.vec_8_spikes = col_array;
+                    obj.vec_8_wl = wl_center;
+        
+                end
         
         function sout = predict_col_spec (obj, vec, spec_max)
             %%PREDICT_COL_SPEC Forward model w/ Lmax
@@ -425,9 +428,9 @@ classdef LightSim < handle
             
             spec_vec = obj.col_spec';
             reflectance_total = spec_vec * vec;
-            spd_reflected = spec_max .* reflectance_total;
+            spd_reflected = spec_max' .* reflectance_total;
             
-            sout = spd_reflected + obj.spd_0';
+            sout = spd_reflected + obj.spd_min;
             
             return
             
