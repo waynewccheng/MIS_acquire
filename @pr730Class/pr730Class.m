@@ -1,13 +1,16 @@
 classdef pr730Class < handle
-    %PR730Class
+    %%PR730CLASS Class for Photo Research PR730 Spectroradiometer
     %
-    %   WCC 3/22/2022, 9/24/2015
+    %   WCC 3/22/2022, 9/24/2015, 6/13/2022
+    %   Last used on HIMSs, Matlab R2022a, 6/13/2022
     %   Last used on Ivies, Matlab R2020b
     %   needs to be a subclass of handle to use destructor
     
     properties
+        ver = '6/13/2022'
         comPort
         connected = false
+        settings
     end
     
     methods
@@ -18,7 +21,7 @@ classdef pr730Class < handle
             
             if nargin ~= 1
                 fprintf('Specify the COM port number such as COM3\n')
-                serialportlist("available")
+                serialportlist('available')
                 return
             end
             
@@ -32,7 +35,7 @@ classdef pr730Class < handle
             
             pause(2)
             
-            Settings = obj.status
+            obj.settings = obj.status
             
             obj.connected = true;
             
@@ -94,7 +97,10 @@ classdef pr730Class < handle
                 slocal(ind,2) = val2;
             end
             
+            measure_time = datetime;
+            measure_inst = obj.settings;
             spect = SpectrumClass(slocal(:,1),slocal(:,2));
+            spect.addTime(measure_time,measure_inst);
         end
         
         function ret = mode4x (obj)

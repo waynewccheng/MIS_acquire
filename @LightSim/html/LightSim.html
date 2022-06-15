@@ -6,7 +6,7 @@
    <!--
 This HTML was auto-generated from MATLAB code.
 To make changes, update the MATLAB code and republish this document.
-      --><title>LightSim: A testbed for evaluating color calibration kits</title><meta name="generator" content="MATLAB 9.11"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-06-10"><meta name="DC.source" content="LightSim.m"><style type="text/css">
+      --><title>LightSim: A testbed for evaluating color calibration kits</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-06-14"><meta name="DC.source" content="LightSim.m"><style type="text/css">
 html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
 
 html { min-height:100%; margin-bottom:1px; }
@@ -73,17 +73,13 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
     <span class="keyword">properties</span>
 
-        col_spec
-        spd_max
-        spd_min
-        spd_max_date
-        spd_min_date
+        col_spec              <span class="comment">% reflectance lookup table 1024x401 for R</span>
 
-        vec_r
-        vec_g
-        vec_b
+        spd_max               <span class="comment">% last measured max</span>
+        spd_min               <span class="comment">% last measured min</span>
+        spd_max_date          <span class="comment">% last measured max</span>
+        spd_min_date          <span class="comment">% last measured min</span>
 
-        rs
     <span class="keyword">end</span>
 
     <span class="keyword">properties</span> (Constant)
@@ -92,7 +88,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
         classpath = fileparts(which(<span class="string">'LightSim'</span>));
 
-        colorchecker_rgb = [115 82 68;
+        colorchecker_rgb = [115 82 68;         <span class="comment">% ColorChecker standard RGB values</span>
             194 150 130;
             98  122 157;
             87  108 67;
@@ -124,6 +120,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     <span class="keyword">methods</span>
 
         <span class="keyword">function</span> obj = LightSim
+            <span class="comment">%%LIGHTSIM Load the reflectance matrix and Lmax,Lmin</span>
 
             <span class="comment">%</span>
             <span class="comment">% get column-reflectance data</span>
@@ -137,6 +134,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
             <span class="comment">%</span>
             datapath = sprintf(<span class="string">'%s/%s'</span>,LightSim.classpath,<span class="string">'spd_max.mat'</span>);
             load(datapath,<span class="string">'spd_m*'</span>);
+
             obj.spd_max = spd_max;
             obj.spd_min = spd_min;
             obj.spd_max_date = spd_max_date;
@@ -145,6 +143,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> colorchecker_test_temp (obj,ol,cs,disp,vec_filename)
+            <span class="comment">%%COLORCHECKER_TEST_TEMP main loop for testing CCKs</span>
+
             <span class="comment">%</span>
             <span class="comment">% added pause for CCK measurement</span>
             <span class="comment">%</span>
@@ -190,8 +190,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> rs = model_NEC (obj)
-
-            <span class="comment">% NEC PA271 Adobe</span>
+            <span class="comment">%%MODEL_NEC Calculate the OL490 vector for emulating the display</span>
+            <span class="comment">% NEC PA271 AdobeRGB mode</span>
 
             nec = NECPA271Sim;
 
@@ -200,11 +200,12 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
             vec_b = obj.spd2vec(nec.spec_b);
 
             save(<span class="string">'vec_nec'</span>,<span class="string">'vec*'</span>)
-
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> rs = model_HPZ24x (obj)
+            <span class="comment">%%MODEL_HPZ24x Calculate the OL490 vector for emulating the display</span>
             <span class="comment">% temp -- see HPZ24xSim</span>
+
             sc = 0.07;
             spec_z24x = xlsread(<span class="string">'hpz24x_rgb.csv'</span>);
 
@@ -215,10 +216,11 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
             vec_b = obj.spd2vec(spec_z24x(3,:));
 
             save(<span class="string">'vec_hp24z'</span>,<span class="string">'vec*'</span>)
-
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> rs = model_rift (obj)
+            <span class="comment">%%MODEL_RIFT Calculate the OL490 vector for emulating the display</span>
+
             rs = RiftSim(0.08);
 
             obj.vec_r = obj.spd2vec(rs.output([255 0 0]));
@@ -348,6 +350,7 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> vec = spd2vec (obj,spd_target)
+            <span class="comment">%%SPD2VEC Inverse model</span>
             <span class="comment">% find the linear vector to generate spd</span>
 
             <span class="keyword">if</span> ~(size(spd_target,1)==401 &amp;&amp; size(spd_target,2)==1)
@@ -493,8 +496,130 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
 
         <span class="keyword">end</span>
 
+        <span class="keyword">function</span> [s_measured,wl_measured] = CHAR (obj,ol,cs)
+            <span class="comment">%%CHAR Do characterization</span>
+
+            <span class="keyword">if</span> 1
+            <span class="comment">% max</span>
+            obj.update_max(ol,cs)
+            <span class="keyword">end</span>
+
+            <span class="keyword">if</span> 1
+            <span class="comment">% min</span>
+            obj.update_min(ol,cs)
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% starting with a comb with previous data</span>
+            <span class="comment">%</span>
+            col_center = [72 202 327 454 583 708 834 956];
+            wl_center = [400 450 500 550 600 650 700 750];
+
+            <span class="comment">% calculate the spacing in the comb; about 126 or 125=25x5</span>
+            col_spacing = mean(diff(col_center))
+
+            <span class="comment">% calculate col per wl; about 2.5257</span>
+            col_per_wl = mean(diff(col_center) ./ diff(wl_center))
+
+            <span class="comment">% required col number per 10 nm; about 25</span>
+            col_per_10wl = round(10 * col_per_wl)
+
+            <span class="comment">% measure every 25 columns</span>
+            comb_step = 25;
+
+            <span class="comment">% use 7 spikes in a comb</span>
+            col_center_7 = col_center(1:7);
+            wl_center_7 = wl_center(1:7);
+
+            <span class="keyword">for</span> comb_idx = 1
+                col_comb_7 = col_center_7 + (comb_idx-1)*comb_step;
+                [s_measured,wl_measured] = obj.measurement_trial(ol,cs,wl_center_7,col_comb_7);
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% build a lookup table</span>
+            <span class="comment">%</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> [s_measured,wl_measured] = measurement_trial (obj,ol,cs,wl_target,col_range)
+            <span class="comment">%</span>
+            <span class="comment">% one trial measurement</span>
+            <span class="comment">%   ol: OL490</span>
+            <span class="comment">%   cs: spectroradiometer</span>
+            <span class="comment">%   wl_target: a list of wavelengths to match</span>
+            <span class="comment">%   col_range: a list of column numbers to use</span>
+            <span class="comment">%   s_dark: pre-measured dark level</span>
+            <span class="comment">%</span>
+
+            s_dark = obj.spd_min;
+
+            <span class="comment">%</span>
+            <span class="comment">% prepare the input</span>
+            <span class="comment">%</span>
+            <span class="comment">%            col_range = OL490Class1Column.col2peak_predict(wl_target);</span>
+            col_vector = OL490Class1Column.multiple_peaks(col_range);
+
+            <span class="comment">%</span>
+            <span class="comment">% control light</span>
+            <span class="comment">%</span>
+            ol.setColumn1024(col_vector);
+
+            <span class="comment">%</span>
+            <span class="comment">% measure</span>
+            <span class="comment">%</span>
+            s = cs.measure;
+
+            <span class="comment">%</span>
+            <span class="comment">% analyze</span>
+            <span class="comment">%</span>
+            spec_no_dark = s.amplitude-s_dark;
+
+            peaks = OL490Class1Column.find_spikes(wl_target,spec_no_dark);
+
+            s_measured = s;
+            wl_measured = peaks(:,1)';
+
+            <span class="comment">%</span>
+            <span class="comment">% report</span>
+            <span class="comment">%</span>
+            [wl_target' wl_measured']
+
+            <span class="comment">%</span>
+            <span class="comment">% visualize</span>
+            <span class="comment">%</span>
+            clf
+            s.plot
+
+            <span class="comment">%</span>
+            <span class="comment">% mark the target wavelength</span>
+            <span class="comment">%</span>
+            <span class="keyword">for</span> i = 1:length(wl_target)
+                x = wl_target(i);
+                xline(x,<span class="string">'b'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% mark the measured wavelength</span>
+            <span class="comment">%</span>
+            <span class="keyword">for</span> i = 1:length(wl_target)
+                x = wl_measured(i);
+                xline(x,<span class="string">'r:'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% save the measurement results</span>
+            <span class="comment">%</span>
+            datapath = sprintf(<span class="string">'%s/%s_%02d'</span>,OL490Class1Column.classpath,<span class="string">'peak1col'</span>,99);
+            save(datapath,<span class="string">'s'</span>,<span class="string">'wl_target'</span>,<span class="string">'col_range'</span>,<span class="string">'col_vector'</span>,<span class="string">'s_dark'</span>);
+
+            <span class="keyword">return</span>
+
+        <span class="keyword">end</span>
+
         <span class="keyword">function</span> update_max (obj,ol,cs)
-            <span class="comment">% Measure the maximum light</span>
+            <span class="comment">%%UPDATE_MAX Measure the maximum light</span>
+
             c_range = 1:1024;
             vec = LightSim.multiple_peaks(c_range);
             ol.setColumn1024(vec)
@@ -504,7 +629,8 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> update_min (obj,ol,cs)
-            <span class="comment">% Measure the maximum light</span>
+            <span class="comment">%%UPDATE_MIN Measure the minimum light</span>
+
             c_range = [];
             vec = LightSim.multiple_peaks(c_range);
             ol.setColumn1024(vec)
@@ -752,6 +878,9 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
         <span class="keyword">end</span>
 
         <span class="keyword">function</span> vout = add_a_peak (vin, col, width, amp)
+            <span class="comment">%%add_a_peak Add one section of columns into a 1024 vector</span>
+            <span class="comment">%</span>
+
             <span class="comment">%</span>
             <span class="comment">% turn on one more column (+/- width) in the given vector</span>
             <span class="comment">%</span>
@@ -775,7 +904,20 @@ table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px soli
     <span class="keyword">end</span>
 
 <span class="keyword">end</span>
-</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2021b</a><br></p></div><!--
+</pre><pre class="codeoutput">
+ans = 
+
+  LightSim with properties:
+
+            col_spec: [1024&times;401 double]
+             spd_max: [401&times;1 double]
+             spd_min: [401&times;1 double]
+        spd_max_date: 03-Jun-2022 14:25:19
+        spd_min_date: 03-Jun-2022 14:24:34
+           classpath: 'C:\Users\wcc\Documents\GitHub\MIS_acquire\@LightSim'
+    colorchecker_rgb: [24&times;3 double]
+
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
 ##### SOURCE BEGIN #####
 %% LightSim: A testbed for evaluating color calibration kits
 classdef LightSim < handle
@@ -784,17 +926,13 @@ classdef LightSim < handle
     
     properties
         
-        col_spec
-        spd_max
-        spd_min
-        spd_max_date
-        spd_min_date
-        
-        vec_r
-        vec_g
-        vec_b
-        
-        rs
+        col_spec              % reflectance lookup table 1024x401 for R
+
+        spd_max               % last measured max
+        spd_min               % last measured min   
+        spd_max_date          % last measured max  
+        spd_min_date          % last measured min   
+
     end
     
     properties (Constant)
@@ -803,7 +941,7 @@ classdef LightSim < handle
         
         classpath = fileparts(which('LightSim'));
         
-        colorchecker_rgb = [115 82 68;
+        colorchecker_rgb = [115 82 68;         % ColorChecker standard RGB values
             194 150 130;
             98  122 157;
             87  108 67;
@@ -829,13 +967,14 @@ classdef LightSim < handle
             160 160 160;
             122 122 121;
             85  85  85;
-            52  52  52];
+            52  52  52]; 
     end
     
     methods
         
         function obj = LightSim
-            
+            %%LIGHTSIM Load the reflectance matrix and Lmax,Lmin
+
             %
             % get column-reflectance data
             %
@@ -848,6 +987,7 @@ classdef LightSim < handle
             %
             datapath = sprintf('%s/%s',LightSim.classpath,'spd_max.mat');
             load(datapath,'spd_m*');
+
             obj.spd_max = spd_max;
             obj.spd_min = spd_min;
             obj.spd_max_date = spd_max_date;
@@ -856,6 +996,8 @@ classdef LightSim < handle
         end
         
         function colorchecker_test_temp (obj,ol,cs,disp,vec_filename)
+            %%COLORCHECKER_TEST_TEMP main loop for testing CCKs
+            
             %
             % added pause for CCK measurement
             %
@@ -901,8 +1043,8 @@ classdef LightSim < handle
         end
         
         function rs = model_NEC (obj)
-            
-            % NEC PA271 Adobe
+            %%MODEL_NEC Calculate the OL490 vector for emulating the display
+            % NEC PA271 AdobeRGB mode
             
             nec = NECPA271Sim;
             
@@ -911,25 +1053,27 @@ classdef LightSim < handle
             vec_b = obj.spd2vec(nec.spec_b);
             
             save('vec_nec','vec*')
-            
         end
         
         function rs = model_HPZ24x (obj)
+            %%MODEL_HPZ24x Calculate the OL490 vector for emulating the display
             % temp REPLACE_WITH_DASH_DASH see HPZ24xSim
+
             sc = 0.07;
             spec_z24x = xlsread('hpz24x_rgb.csv');
-            
+
             spec_z24x = spec_z24x(21:end,:)'*sc;
-            
+
             vec_r = obj.spd2vec(spec_z24x(1,:));
             vec_g = obj.spd2vec(spec_z24x(2,:));
             vec_b = obj.spd2vec(spec_z24x(3,:));
-            
+
             save('vec_hp24z','vec*')
-            
         end
         
         function rs = model_rift (obj)
+            %%MODEL_RIFT Calculate the OL490 vector for emulating the display
+            
             rs = RiftSim(0.08);
             
             obj.vec_r = obj.spd2vec(rs.output([255 0 0]));
@@ -1059,6 +1203,7 @@ classdef LightSim < handle
         end
         
         function vec = spd2vec (obj,spd_target)
+            %%SPD2VEC Inverse model
             % find the linear vector to generate spd
             
             if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
@@ -1204,8 +1349,130 @@ classdef LightSim < handle
             
         end
         
+        function [s_measured,wl_measured] = CHAR (obj,ol,cs)
+            %%CHAR Do characterization
+
+            if 1
+            % max
+            obj.update_max(ol,cs)
+            end
+
+            if 1
+            % min
+            obj.update_min(ol,cs)
+            end
+
+            %
+            % starting with a comb with previous data
+            %
+            col_center = [72 202 327 454 583 708 834 956];
+            wl_center = [400 450 500 550 600 650 700 750];
+
+            % calculate the spacing in the comb; about 126 or 125=25x5
+            col_spacing = mean(diff(col_center))
+
+            % calculate col per wl; about 2.5257
+            col_per_wl = mean(diff(col_center) ./ diff(wl_center))
+
+            % required col number per 10 nm; about 25
+            col_per_10wl = round(10 * col_per_wl)
+            
+            % measure every 25 columns
+            comb_step = 25;
+
+            % use 7 spikes in a comb
+            col_center_7 = col_center(1:7);
+            wl_center_7 = wl_center(1:7);
+
+            for comb_idx = 1
+                col_comb_7 = col_center_7 + (comb_idx-1)*comb_step;
+                [s_measured,wl_measured] = obj.measurement_trial(ol,cs,wl_center_7,col_comb_7);
+            end
+
+            %
+            % build a lookup table
+            %
+
+        end
+
+        function [s_measured,wl_measured] = measurement_trial (obj,ol,cs,wl_target,col_range)
+            %
+            % one trial measurement
+            %   ol: OL490
+            %   cs: spectroradiometer
+            %   wl_target: a list of wavelengths to match
+            %   col_range: a list of column numbers to use
+            %   s_dark: pre-measured dark level
+            %
+
+            s_dark = obj.spd_min;
+
+            %
+            % prepare the input
+            %
+            %            col_range = OL490Class1Column.col2peak_predict(wl_target);
+            col_vector = OL490Class1Column.multiple_peaks(col_range);
+
+            %
+            % control light
+            %
+            ol.setColumn1024(col_vector);
+
+            %
+            % measure
+            %
+            s = cs.measure;
+
+            %
+            % analyze
+            %
+            spec_no_dark = s.amplitude-s_dark;
+
+            peaks = OL490Class1Column.find_spikes(wl_target,spec_no_dark);
+
+            s_measured = s;
+            wl_measured = peaks(:,1)';
+
+            %
+            % report
+            %
+            [wl_target' wl_measured']
+
+            %
+            % visualize
+            %
+            clf
+            s.plot
+
+            %
+            % mark the target wavelength
+            %
+            for i = 1:length(wl_target)
+                x = wl_target(i);
+                xline(x,'b')
+            end
+
+            %
+            % mark the measured wavelength
+            %
+            for i = 1:length(wl_target)
+                x = wl_measured(i);
+                xline(x,'r:')
+            end
+
+            %
+            % save the measurement results
+            %
+            datapath = sprintf('%s/%s_%02d',OL490Class1Column.classpath,'peak1col',99);
+            save(datapath,'s','wl_target','col_range','col_vector','s_dark');
+
+            return
+
+        end
+
         function update_max (obj,ol,cs)
-            % Measure the maximum light
+            %%UPDATE_MAX Measure the maximum light
+
             c_range = 1:1024;
             vec = LightSim.multiple_peaks(c_range);
             ol.setColumn1024(vec)
@@ -1215,7 +1482,8 @@ classdef LightSim < handle
         end
         
         function update_min (obj,ol,cs)
-            % Measure the maximum light
+            %%UPDATE_MIN Measure the minimum light
+
             c_range = [];
             vec = LightSim.multiple_peaks(c_range);
             ol.setColumn1024(vec)
@@ -1463,6 +1731,9 @@ classdef LightSim < handle
         end
         
         function vout = add_a_peak (vin, col, width, amp)
+            %%add_a_peak Add one section of columns into a 1024 vector
+            % 
+
             %
             % turn on one more column (+/- width) in the given vector
             %

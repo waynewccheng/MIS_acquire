@@ -1,0 +1,367 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>pr730Class</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-06-13"><meta name="DC.source" content="pr730Class.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">Enter remote mode</a></li><li><a href="#7">destructor</a></li></ul></div><pre class="codeinput"><span class="keyword">classdef</span> pr730Class &lt; handle
+    <span class="comment">%%PR730CLASS Class for Photo Research PR730 Spectroradiometer</span>
+    <span class="comment">%</span>
+    <span class="comment">%   WCC 3/22/2022, 9/24/2015, 6/13/2022</span>
+    <span class="comment">%   Last used on HIMSs, Matlab R2022a, 6/13/2022</span>
+    <span class="comment">%   Last used on Ivies, Matlab R2020b</span>
+    <span class="comment">%   needs to be a subclass of handle to use destructor</span>
+
+    <span class="keyword">properties</span>
+        ver = <span class="string">'6/13/2022'</span>
+        comPort
+        connected = false
+        settings
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+</pre><h2 id="2">Enter remote mode</h2><pre class="codeinput">        <span class="keyword">function</span> obj = pr730Class (portname)
+            <span class="comment">% enter and exit the remote mode to avoid receiving the 'REMOTE MODE' message; should flush the serial port</span>
+            <span class="comment">% enter Remote mode</span>
+
+            <span class="keyword">if</span> nargin ~= 1
+                fprintf(<span class="string">'Specify the COM port number such as COM3\n'</span>)
+                serialportlist(<span class="string">'available'</span>)
+                <span class="keyword">return</span>
+            <span class="keyword">end</span>
+
+            obj.comPort = rs232Class(portname);
+
+            obj.comPort.send(<span class="string">'P'</span>);
+            obj.comPort.send(<span class="string">'H'</span>);
+            obj.comPort.send(<span class="string">'O'</span>);
+            obj.comPort.send(<span class="string">'T'</span>);
+            obj.comPort.send(<span class="string">'O'</span>);
+
+            pause(2)
+
+            obj.settings = obj.status
+
+            obj.connected = true;
+
+            <span class="keyword">return</span>
+
+        <span class="keyword">end</span>
+</pre><pre class="codeoutput">Specify the COM port number such as COM3
+
+ans = 
+
+  1&times;3 string array
+
+    "COM1"    "COM4"    "COM14"
+
+</pre><pre class="codeinput">        <span class="keyword">function</span> close (obj)
+            <span class="comment">% exit Remote mode</span>
+            obj.comPort.send(<span class="string">'Q'</span>)
+            obj.comPort.send(13)
+
+            <span class="comment">% close RS232</span>
+            obj.comPort.close;
+
+            pause(1)
+        <span class="keyword">end</span>
+</pre><pre class="codeinput">        <span class="keyword">function</span> ret = status (obj)
+            obj.comPort.send(<span class="string">'D'</span>)
+            obj.comPort.send(<span class="string">'602'</span>)
+            obj.comPort.send(13)
+
+            ret = obj.comPort.get;
+        <span class="keyword">end</span>
+</pre><pre class="codeinput">        <span class="keyword">function</span> spect = measure (obj)
+            slocal = zeros(401,2);
+
+            <span class="comment">% send command to take a measurement</span>
+            obj.comPort.send(<span class="string">'M'</span>)
+            obj.comPort.send(<span class="string">'5'</span>)
+            obj.comPort.send(13)
+
+            <span class="comment">% obtain reading here</span>
+            k = obj.comPort.get;
+
+            <span class="comment">% get rid of the leading 'REMOTE MODE'</span>
+            <span class="keyword">while</span> (k(1)&gt;<span class="string">'9'</span> || k(1)&lt;<span class="string">'0'</span>)
+                k = k(2:end);
+            <span class="keyword">end</span>
+
+            ind = 0;
+            <span class="keyword">for</span> ii = 380:780
+                k = obj.comPort.get;
+                <span class="comment">% get rid of the leading 'REMOTE MODE'</span>
+                <span class="keyword">while</span> (k(1)&gt;<span class="string">'9'</span> || k(1)&lt;<span class="string">'0'</span>)
+                    k = k(2:end);
+                <span class="keyword">end</span>
+                val = textscan(k,<span class="string">'%d,%f\n'</span>);
+                val2 = cell2mat(val(2));
+
+                ind = ind + 1;
+                slocal(ind,1) = ii;
+                slocal(ind,2) = val2;
+            <span class="keyword">end</span>
+
+            spect = SpectrumClass(slocal(:,1),slocal(:,2));
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> ret = mode4x (obj)
+
+            <span class="comment">% send command to take a measurement</span>
+            obj.comPort.send(<span class="string">'S'</span>)
+            obj.comPort.send(<span class="string">'G'</span>)
+            obj.comPort.send(<span class="string">'3'</span>)
+            obj.comPort.send(13)
+
+            <span class="comment">% obtain reading here</span>
+            ret = obj.comPort.get;
+
+        <span class="keyword">end</span>
+</pre><pre class="codeinput">        <span class="keyword">function</span> ret = mode1x (obj)
+
+            <span class="comment">% send command to take a measurement</span>
+            obj.comPort.send(<span class="string">'S'</span>)
+            obj.comPort.send(<span class="string">'G'</span>)
+            obj.comPort.send(<span class="string">'0'</span>)
+            obj.comPort.send(13)
+
+            <span class="comment">% obtain reading here</span>
+            ret = obj.comPort.get;
+
+        <span class="keyword">end</span>
+</pre><h2 id="7">destructor</h2><p>exit remote mode and close RS232 because frequently forgot to close PR730 before exiting Matlab doesn't work as hoped</p><pre class="codeinput">        <span class="keyword">function</span> delete (obj)
+            <span class="keyword">if</span> obj.connected
+                instrfindall
+                [<span class="string">'Deleting PR730 object...'</span>]
+                obj.connected = false;
+                obj.close;
+            <span class="keyword">end</span>
+            <span class="keyword">return</span>
+        <span class="keyword">end</span>
+</pre><pre class="codeoutput">
+ans = 
+
+  pr730Class with properties:
+
+          ver: '6/13/2022'
+      comPort: []
+    connected: 0
+     settings: []
+
+</pre><pre class="codeinput">    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+classdef pr730Class < handle
+    %%PR730CLASS Class for Photo Research PR730 Spectroradiometer
+    %
+    %   WCC 3/22/2022, 9/24/2015, 6/13/2022
+    %   Last used on HIMSs, Matlab R2022a, 6/13/2022
+    %   Last used on Ivies, Matlab R2020b
+    %   needs to be a subclass of handle to use destructor
+    
+    properties
+        ver = '6/13/2022'
+        comPort
+        connected = false
+        settings
+    end
+    
+    methods
+        %% Enter remote mode
+        function obj = pr730Class (portname)
+            % enter and exit the remote mode to avoid receiving the 'REMOTE MODE' message; should flush the serial port
+            % enter Remote mode
+            
+            if nargin ~= 1
+                fprintf('Specify the COM port number such as COM3\n')
+                serialportlist('available')
+                return
+            end
+            
+            obj.comPort = rs232Class(portname);
+            
+            obj.comPort.send('P');
+            obj.comPort.send('H');
+            obj.comPort.send('O');
+            obj.comPort.send('T');
+            obj.comPort.send('O');
+            
+            pause(2)
+            
+            obj.settings = obj.status
+            
+            obj.connected = true;
+            
+            return
+            
+        end
+        
+        
+        %%
+        function close (obj)
+            % exit Remote mode
+            obj.comPort.send('Q')
+            obj.comPort.send(13)
+            
+            % close RS232
+            obj.comPort.close;
+            
+            pause(1)
+        end
+        
+        %%
+        function ret = status (obj)
+            obj.comPort.send('D')
+            obj.comPort.send('602')
+            obj.comPort.send(13)
+            
+            ret = obj.comPort.get;
+        end
+        
+        %%
+        function spect = measure (obj)
+            slocal = zeros(401,2);
+            
+            % send command to take a measurement
+            obj.comPort.send('M')
+            obj.comPort.send('5')
+            obj.comPort.send(13)
+            
+            % obtain reading here
+            k = obj.comPort.get;
+            
+            % get rid of the leading 'REMOTE MODE'
+            while (k(1)>'9' || k(1)<'0')
+                k = k(2:end);
+            end
+            
+            ind = 0;
+            for ii = 380:780
+                k = obj.comPort.get;
+                % get rid of the leading 'REMOTE MODE'
+                while (k(1)>'9' || k(1)<'0')
+                    k = k(2:end);
+                end
+                val = textscan(k,'%d,%f\n');
+                val2 = cell2mat(val(2));
+                
+                ind = ind + 1;
+                slocal(ind,1) = ii;
+                slocal(ind,2) = val2;
+            end
+            
+            spect = SpectrumClass(slocal(:,1),slocal(:,2));
+        end
+        
+        function ret = mode4x (obj)
+            
+            % send command to take a measurement
+            obj.comPort.send('S')
+            obj.comPort.send('G')
+            obj.comPort.send('3')
+            obj.comPort.send(13)
+            
+            % obtain reading here
+            ret = obj.comPort.get;
+            
+        end
+        
+        %%
+        function ret = mode1x (obj)
+            
+            % send command to take a measurement
+            obj.comPort.send('S')
+            obj.comPort.send('G')
+            obj.comPort.send('0')
+            obj.comPort.send(13)
+            
+            % obtain reading here
+            ret = obj.comPort.get;
+            
+        end
+        
+        %% destructor
+        % exit remote mode and close RS232
+        % because frequently forgot to close PR730 before exiting Matlab
+        % doesn't work as hoped
+        function delete (obj)
+            if obj.connected
+                instrfindall
+                ['Deleting PR730 object...']
+                obj.connected = false;
+                obj.close;
+            end
+            return
+        end
+    end
+    
+end
+
+##### SOURCE END #####
+--></body></html>

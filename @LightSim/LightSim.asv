@@ -471,7 +471,6 @@ classdef LightSim < handle
             for comb_idx = 1:5
                 col_comb_7 = col_center_7 + (comb_idx-1)*comb_step;
                 [s_measured,wl_measured] = obj.measurement_trial(ol,cs,wl_center_7,col_comb_7);
-                col_comb_7_all{comb_idx} = col_comb_7;
                 s_measured_all{comb_idx} = s_measured;
                 wl_measured_all{comb_idx} = wl_measured;
             end
@@ -479,7 +478,7 @@ classdef LightSim < handle
             spd_max = obj.spd_max;
             spd_min = obj.spd_min;
 
-            save('char.mat','s_measured_all','wl_measured_all','spd_max','spd_min','col_comb_7_all')
+            save('char.mat','s_measured_all','wl_measured_all','spd_max','spd_min')
             %
             % build a lookup table
             %
