@@ -51,11 +51,30 @@ classdef SpectrumClass
         end
 
         function obj3 = plus (obj1, obj2)
-            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude+obj2.amplitude);
+            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
+
+            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude + obj2.amplitude);
+        end
+
+        function obj3 = minus (obj1, obj2)
+            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
+
+            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude - obj2.amplitude);
         end
 
         function obj2 = mtimes (obj,s)
+            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
+
             obj2 = SpectrumClass(obj.wavelength,obj.amplitude*s);
         end
+
+        function obj3 = rdivide (obj1, obj2)
+            %%RDIVIDE Define division of two spectra ./
+            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
+
+            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude ./ obj2.amplitude);
+        end
+
     end
+
 end

@@ -432,7 +432,73 @@ classdef LightSim < handle
             return
             
         end
-        
+
+        function CHAR2 (obj,ol,cs)
+            %%CHAR Do characterization
+
+            %
+            % Analyze the previous data to understand the mapping between column and
+            % wavelength. We are looking for a comb of columns that
+            % generates wavelengths 400:50:750.
+            %
+            col_center = [72 202 327 454 583 708 834 956];
+            wl_center = [400 450 500 550 600 650 700 750];
+
+            % The spacing of the comb is about 125=25x5
+            col_spacing = mean(diff(col_center))
+
+            % col per wl is about 2.5257
+            col_per_wl = mean(diff(col_center) ./ diff(wl_center))
+
+            % required col number per 10 nm; about 25
+            col_per_10wl = round(10 * col_per_wl)
+
+            % measure every 25 columns
+            comb_step = 25;
+
+            % use 7 spikes in a comb
+            col_base = col_center(1:7);
+            wl_base = wl_center(1:7);
+
+            %
+            % Prepare the test vectors
+            %
+            for comb_idx = 1:5
+                % expected wavelengths
+                wl_expected{comb_idx} = wl_base + (comb_idx-1)*10;
+
+                % vectors to input
+                col_list = col_base + (comb_idx-1)*comb_step;
+                col_input{comb_idx} = col_list;
+                vec_input{comb_idx} = OL490Class.VEC_multiple_peaks(col_list);
+            end
+
+            % Lmax
+            comb_idx = 6;
+            wl_expected{comb_idx} = 380:780;
+            col_list = 1:1024;
+            vec_input{comb_idx} = OL490Class.VEC_multiple_peaks(col_list);
+
+            % Lmin
+            comb_idx = 7;
+            wl_expected{comb_idx} = [];
+            col_list = [];
+            vec_input{comb_idx} = OL490Class.VEC_multiple_peaks(col_list);
+
+            %
+            % Execute the measurements
+            %
+            for comb_idx = 1:7
+                spec_output{comb_idx} = ol.setColumn1024andMeasure(vec_input{comb_idx},cs);
+            end
+
+            %
+            % Save the results for the next stage
+            %
+            save('OL490_characterization_data.mat','wl_expected','col_input','vec_input','spec_output')
+
+        end
+
         function [s_measured,wl_measured] = CHAR (obj,ol,cs)
             %%CHAR Do characterization
 

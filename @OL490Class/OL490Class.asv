@@ -94,12 +94,17 @@ classdef OL490Class < handle
         end
 
         %%
-        function spec = setColumn1024andMeasure (obj, A, cs)
-            %%SETCOLUMN1024ANDMEASURE Set the raw column values and measure
-            %%the output spectrum
-            obj.setColumn1024(A);
-            spec = cs.measure;
+        function setColumn1024andMeasure (obj, A, cs)
+            
+            
+            st = zeros(1,1024);
 
+            for colno = 1:1024
+                % adjust this value
+                st(1,colno) = obj.max_column_value * A(colno);
+            end
+
+            e = obj.m.TurnOnColumn(st);            
         end
                 
         %%
