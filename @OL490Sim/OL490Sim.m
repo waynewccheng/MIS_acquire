@@ -79,6 +79,60 @@ classdef OL490Sim < handle
 
         end
 
+        function FWD_stimulate_gamma (obj, ol, cs)
+            %FWD_STIMULATE_GAMMA Characterize the column gamma
+
+            assert(isa(ol,'OL490Class'))
+            % how to check pr730?
+
+            VIS = 0;
+
+            % Sweep the column amplitude
+            vec_max = repmat([1],1,1024);      % all columns on
+            scale = 0:0.1:1;                   % scaling factor
+
+            meascale = {};
+            for i = 1:length(scale)
+                vec = vec_max * scale(i);
+                ol.setColumn1024(vec)
+                i
+                mea = cs.measure;
+                meascale{i} = mea;
+            end
+
+            % visualize
+            if VIS
+                clf
+                hold on
+                for i=1:length(scale)
+                    meascale{i}.plot
+                end
+            end
+
+            % use area under the curve to calculate the ratio
+            for i=1:length(scale)
+                mea_net = meascale{i} - meascale{1};
+                meaarea(i) = sum(mea_net.amplitude);
+            end
+
+            % normalize
+            meaarea = meaarea / max(meaarea);
+
+            if VIS
+                clf
+                plot(scale,meaarea,'o')
+                grid on
+            end
+
+            % save the data
+            gamma_lut = zeros(11,2);
+            gamma_lut(:,1) = scale;
+            gamma_lut(:,2) = meaarea;
+
+            save('gamma_lut_HIMS1_06162022.mat','gamma_lut')
+
+        end
+
         function FWD_characterize (obj)
             %FWD_CHARACTERIZE Analyze the collected data to construct the
             %reflectance matrix

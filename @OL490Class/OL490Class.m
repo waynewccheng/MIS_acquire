@@ -23,6 +23,8 @@ classdef OL490Class < handle
         
         gamma_lut
         classpath
+
+        HIMS
     end
     
     methods
@@ -33,11 +35,8 @@ classdef OL490Class < handle
             [filepath,name,ext] = fileparts(which('OL490Class'));                
             ol490dllpath = filepath;
             obj.classpath = ol490dllpath;
+            obj.HIMS = -1;
 
-            filepath = sprintf('%s/%s.mat',obj.classpath,'gamma_lut')
-            load(filepath,'gamma_lut');
-            obj.gamma_lut = gamma_lut;
-            
             %% todo: check existing assembly
             % http://stackoverflow.com/questions/5368974/how-to-check-if-net-assembly-was-already-added-in-matlab
             
@@ -74,6 +73,23 @@ classdef OL490Class < handle
             e = obj.m.EnableLinearLightReduction(-1)
 
             e = obj.m.SetGrayScaleValue(0)
+
+            % use HIMS1 as the default
+            obj.setParameters(1);
+        end
+
+        function setParameters (obj, HIMS)
+
+            if HIMS==1
+                filepath = sprintf('%s/%s.mat',obj.classpath,'gamma_lut_HIMS1_06162022')
+            else
+                filepath = sprintf('%s/%s.mat',obj.classpath,'gamma_lut')
+            end
+            
+            load(filepath,'gamma_lut');
+            obj.gamma_lut = gamma_lut;
+
+            obj.HIMS = HIMS;
         end
 
         %%
