@@ -1,6 +1,6 @@
 %% SpectrumClass
 
-classdef SpectrumClass
+classdef SpectrumClass < handle
     %SPECTRUMCLASS SpectrumClas SUMMARY
     %   Class for processing spectral data obtained by different
     %   spectroradiometers
@@ -14,6 +14,7 @@ classdef SpectrumClass
         amplitude
         date
         instrument
+        time_used
     end
 
     %% Methods
@@ -33,10 +34,11 @@ classdef SpectrumClass
         end
 
 
-        function obj = addTime (obj, date, inst)
+        function obj = addTime (obj, date, inst, time_used)
             %%ADDTIME Add time stamps to a measurement
             obj.date = date;
             obj.instrument = inst;
+            obj.time_used = time_used;
         end
 
         function plot (obj)
@@ -62,10 +64,10 @@ classdef SpectrumClass
             obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude - obj2.amplitude);
         end
 
-        function obj2 = mtimes (obj,s)
+        function obj3 = times (obj1, obj2)
             assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
 
-            obj2 = SpectrumClass(obj.wavelength,obj.amplitude*s);
+            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude .* obj2.amplitude);
         end
 
         function obj3 = rdivide (obj1, obj2)

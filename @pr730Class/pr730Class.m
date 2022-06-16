@@ -7,7 +7,7 @@ classdef pr730Class < handle
     %   needs to be a subclass of handle to use destructor
     
     properties
-        ver = '6/13/2022'
+        ver = '6/15/2022'
         comPort
         connected = false
         settings
@@ -67,6 +67,11 @@ classdef pr730Class < handle
         
         %%
         function spect = measure (obj)
+            %%MEASURE Take a measurement
+            %
+
+            tic;
+
             slocal = zeros(401,2);
             
             % send command to take a measurement
@@ -97,10 +102,12 @@ classdef pr730Class < handle
                 slocal(ind,2) = val2;
             end
             
+            time_used = toc;
+
             measure_time = datetime;
             measure_inst = obj.settings;
             spect = SpectrumClass(slocal(:,1),slocal(:,2));
-            spect.addTime(measure_time,measure_inst);
+            spect.addTime(measure_time,measure_inst,time_used);
         end
         
         function ret = mode4x (obj)
