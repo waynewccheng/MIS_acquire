@@ -24,10 +24,6 @@ classdef OL490Sim < handle
             obj.classpath = fileparts(which('OL490Sim'));
             obj.inputdatapath = sprintf('%s/%s',obj.classpath,obj.spike_filename); % HIMS2
             obj.outputdatapath = sprintf('%s/%s',obj.classpath,'col_spec_0615.mat'); % HIMS2
-
-            load(obj.outputdatapath,'col_spec')
-            obj.FWD_characterize;
-            
         end
 
         function FWD_stimulate (obj, ol, cs)
@@ -275,11 +271,9 @@ classdef OL490Sim < handle
         end
 
         function vec = INV_spd2vec (obj,spd_target)
-            %%SPD2VEC Inverse model
+            %INV_SPD2VEC Inverse model
             % find the linear vector to generate spd
             
-            VIS = 0;
-
             if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
                 spd_target = spd_target';
             end
@@ -288,7 +282,7 @@ classdef OL490Sim < handle
             assert(size(spd_target,1)==401 && size(spd_target,2)==1);
             
             % visualize
-            if VIS
+            if 0
                 clf
                 hold on
                 plot(380:780,obj.spd_max)
@@ -300,12 +294,12 @@ classdef OL490Sim < handle
             %
             % calcualte the reflectance
             %
-            ref_target_orig = (spd_target - obj.speC_min.amplitude) ./ (obj.speC_max.amplitude - obj.speC_min.amplitude);
+            ref_target_orig = (spd_target - obj.spd_min) ./ (obj.spd_max - obj.spd_min);
             ref_target = min(1,ref_target_orig);
             ref_target = max(0,ref_target);
             
             % visualize
-            if VIS
+            if 0
                 clf
                 hold on
                 plot(ref_target_orig)
@@ -322,7 +316,7 @@ classdef OL490Sim < handle
             vec_orig = rsolve.A;
             
             %            vec_orig = R_callRsolver1024(ref_m,ref_target);
-            if VIS
+            if 0
                 load('vec','vec')
                 vec_orig = vec;
             end
@@ -333,11 +327,25 @@ classdef OL490Sim < handle
             vec = max(0,vec);
             
             % visualize the vector
-            if VIS
+            if 0
                 clf
                 plot(vec)
                 title('Check the vector given by R')
             end
+            
+            % predict the reflectance
+            ref_predicted = obj.vec2ref(vec);
+            
+            % visualize
+            if 0
+                clf
+                hold on
+                plot(ref_target)
+                plot(ref_predicted)
+                legend('target','predicted')
+                title('Check predicted reflectance')
+            end
+            
         end
 
 

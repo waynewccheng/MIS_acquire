@@ -67,6 +67,8 @@ classdef RiftSim < DispSim
             obj.spec_g = ramp_g(end,:) * obj.sc;
             obj.spec_b = ramp_b(end,:) * obj.sc;
             
+            obj.OL490_load_vec;
+            
         end
         
         function rgb_lin = gamma (obj,rgb)

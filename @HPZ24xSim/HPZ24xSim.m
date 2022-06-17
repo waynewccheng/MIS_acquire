@@ -18,9 +18,11 @@ classdef HPZ24xSim < DispSim
             obj.spec_g = spec_z24x(2,:);
             obj.spec_b = spec_z24x(3,:);
 
+            obj.OL490_load_vec;
+
         end
 
     end
-    
+
 end
 

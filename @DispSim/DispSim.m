@@ -7,6 +7,10 @@ classdef DispSim < handle
         spec_b        
         classpath
         gamma_srgb
+
+        vec_r
+        vec_g
+        vec_b
     end
     
     methods
@@ -70,7 +74,31 @@ classdef DispSim < handle
             axis equal
 
         end        
-        
+
+        function OL490_model (obj,ol490sim)
+
+            'Modeling R'
+            vec_r = ol490sim.INV_spd2vec(obj.spec_r);
+            'Modeling G'
+            vec_g = ol490sim.INV_spd2vec(obj.spec_g);
+            'Modeling B'
+            vec_b = ol490sim.INV_spd2vec(obj.spec_b);
+
+            vec_filename = sprintf('%s/%s',obj.classpath,'OL490_vec.mat');
+            save(vec_filename,'vec_r','vec_g','vec_b')
+
+        end
+
+        function OL490_load_vec (obj)
+            
+            vec_filename = sprintf('%s/%s',obj.classpath,'OL490_vec.mat');
+            load(vec_filename,'vec_r','vec_g','vec_b')
+            obj.vec_r = vec_r;
+            obj.vec_g = vec_g;
+            obj.vec_b = vec_b;
+
+        end
+
     end
 end
 
