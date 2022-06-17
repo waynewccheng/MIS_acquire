@@ -270,6 +270,73 @@ classdef OL490Sim < handle
             spdC_predicted = reflC .* obj.speC_max;
         end
 
+        function vec = spd2vec (obj,spd_target)
+            %%SPD2VEC Inverse model
+            % find the linear vector to generate spd
+            
+            VIS = 0;
+
+            if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
+                spd_target = spd_target';
+            end
+            
+            % need to be vertical
+            assert(size(spd_target,1)==401 && size(spd_target,2)==1);
+            
+            % visualize
+            if VIS
+                clf
+                hold on
+                plot(380:780,obj.spd_max)
+                plot(380:780,spd_target)
+                legend('spd max','spd target')
+                title('Check the target spd')
+            end
+            
+            %
+            % calcualte the reflectance
+            %
+            ref_target_orig = (spd_target - obj.spd_min) ./ (obj.spd_max - obj.spd_min);
+            ref_target = min(1,ref_target_orig);
+            ref_target = max(0,ref_target);
+            
+            % visualize
+            if VIS
+                clf
+                hold on
+                plot(ref_target_orig)
+                plot(ref_target)
+                title('Check target reflectance')
+            end
+            
+            %
+            % solve the equation with R
+            %
+            ref_m = obj.col_spec';
+            rsolve = Rsolver(ref_m,ref_target);
+            
+            vec_orig = rsolve.A;
+            
+            %            vec_orig = R_callRsolver1024(ref_m,ref_target);
+            if VIS
+                load('vec','vec')
+                vec_orig = vec;
+            end
+            
+            % limit to [0,1]
+            vec = vec_orig;
+            vec = min(1,vec);
+            vec = max(0,vec);
+            
+            % visualize the vector
+            if VIS
+                clf
+                plot(vec)
+                title('Check the vector given by R')
+            end
+        end
+
+
     end
 
 end
