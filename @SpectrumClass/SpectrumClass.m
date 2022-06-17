@@ -48,6 +48,13 @@ classdef SpectrumClass < handle
             title('Spectrum')
         end
 
+        function ret = XYZ (obj)
+            spec = obj.amplitude(1:10:end);
+            cc = ColorConversionClass;
+
+            ret = cc.spd2XYZ(spec);
+        end
+
         function disp (obj)
             [obj.wavelength' obj.amplitude']
         end
