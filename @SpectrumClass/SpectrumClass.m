@@ -55,6 +55,11 @@ classdef SpectrumClass < handle
             ret = cc.spd2XYZ(spec);
         end
 
+        function ret = xyz (obj)
+            XYZ = obj.XYZ;
+            ret = XYZ ./ sum(XYZ);
+        end
+        
         function disp (obj)
             [obj.wavelength' obj.amplitude']
         end

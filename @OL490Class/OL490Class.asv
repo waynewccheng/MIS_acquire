@@ -102,8 +102,8 @@ classdef OL490Class < handle
             obj.HIMS = HIMS;
         end
 
-        function vec = XYZ2vec (obj,XYZ)
-            %XYZ2vec Color matching functions
+        function XYZ2vec (obj,XYZ)
+            %XYZ2vec CoMix the RGB vec values according to rgb_lin
             %
 
             % assume additivity

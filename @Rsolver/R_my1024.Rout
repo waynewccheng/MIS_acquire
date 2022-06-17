@@ -23,18 +23,9 @@ Type 'q()' to quit R.
 > R_mysolveA1024()
 N = 1024, M = 5 machine precision = 2.22045e-16
 The initial X is infeasible.  Restart with its projection.
-
-iterations 38
-function evaluations 40
-segments explored during Cauchy searches 807
-BFGS updates skipped 0
-active bounds at final generalized Cauchy point 727
-norm of the final projected gradient 0.000943969
-final function value 0.265898
-
-final  value 0.265898 
-converged
+final  value 0.018948 
+stopped after 101 iterations
 > 
 > proc.time()
    user  system elapsed 
-  79.15    0.57   79.98 
+ 200.97    1.07  206.98 

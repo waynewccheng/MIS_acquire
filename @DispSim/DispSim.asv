@@ -99,40 +99,29 @@ classdef DispSim < handle
 
         end
 
-        function rgb_lin = XYZ2RGB_lin (obj, XYZ_target)
+        function XYZ2RGB_lin (obj, XYZ_target)
             %XYZ2RGB_LIN Find the linear RGB for the display to generate
             %XYZ
 
-            % XYZ_target is 1x3
-            assert(isequal(size(XYZ_target),[1 3]))
-
+            % XYZ_target should be 
             spec_r = obj.spec_r(1:10:end)';
             spec_g = obj.spec_g(1:10:end)';
             spec_b = obj.spec_b(1:10:end)';
 
-            cc = ColorConversionClass;
-
-            XYZ_r = cc.spd2XYZ(spec_r);
-            XYZ_g = cc.spd2XYZ(spec_g);
-            XYZ_b = cc.spd2XYZ(spec_b);
+            XYZ_r = cc.spd2XYZ(spec_r)
+            XYZ_g = cc.spd2XYZ(spec_g)
+            XYZ_b = cc.spd2XYZ(spec_b)
 
             M = [XYZ_r' XYZ_g' XYZ_b'];
             M_inv = inv(M);
 
-            rgb_lin = M_inv*XYZ_target';
+            rgb_lin = M_inv*XYZ_target'
 
-        end
-
-        function vec = RGB_lin2vec (obj, rgb_lin)
-            %RGB_LIN2VEC Mix the RGB vec values according to rgb_lin
-            %
-
+            %% DispEmu
             % assume additivity
-            vec = obj.vec_r * rgb_lin(1) + obj.vec_g * rgb_lin(2) + obj.vec_b * rgb_lin(3);
+            vec = disp.vec_r * rgb_lin(1) + disp.vec_g * rgb_lin(2) + disp.vec_b * rgb_lin(3);
+
             
-            % trimming
-            vec = max(0,vec);
-            vec = min(1,vec);
         end
 
     end
