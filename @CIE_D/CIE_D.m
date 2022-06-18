@@ -1,106 +1,18 @@
-%% SpectrumClass
+% Convert CCK to spectrum
+% CCK = CIE D standard illuminants (D65, D50...)
+% 8-12-2015
+% 3/25/2022: classify
+% spec = cieD2spec(6500); plot(spec);
 
-classdef SpectrumClass < handle
-    %SPECTRUMCLASS SpectrumClas SUMMARY
-    %   Class for processing spectral data obtained by different
-    %   spectroradiometers
-    %
-    %   WCC
-    %   6/13/2022
-    %   6/17/2022: added CIE_D
+classdef CIE_D < handle
 
-    %% Properties
-    properties
-        wavelength
-        amplitude
-        date
-        instrument
-        time_used
-    end
-
-    %% Methods
-    methods
-
-        function obj = SpectrumClass (wl, amp)
-            if nargin < 2
-                disp('require wl and amp')
-            else
-                if size(wl) ~= size(amp)
-                    disp('wrong size')
-                else
-                    obj.wavelength = wl;
-                    obj.amplitude = amp;
-                end
-            end
-        end
-
-
-        function obj = addTime (obj, date, inst, time_used)
-            %%ADDTIME Add time stamps to a measurement
-            obj.date = date;
-            obj.instrument = inst;
-            obj.time_used = time_used;
-        end
-
-        function plot (obj)
-            plot(obj.wavelength,obj.amplitude);
-            xlabel('wavelength (nm)')
-            ylabel('SPD')
-            title('Spectrum')
-        end
-
-        function ret = XYZ (obj)
-            spec = obj.amplitude(1:10:end);
-            cc = ColorConversionClass;
-
-            ret = cc.spd2XYZ(spec);
-        end
-
-        function ret = xyz (obj)
-            XYZ = obj.XYZ;
-            ret = XYZ ./ sum(XYZ);
-        end
-
-        function disp (obj)
-            [obj.wavelength' obj.amplitude']
-        end
-
-        function obj3 = plus (obj1, obj2)
-            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
-
-            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude + obj2.amplitude);
-        end
-
-        function obj3 = minus (obj1, obj2)
-            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
-
-            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude - obj2.amplitude);
-        end
-
-        function obj3 = times (obj1, obj2)
-            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
-
-            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude .* obj2.amplitude);
-        end
-
-        function obj3 = rdivide (obj1, obj2)
-            %%RDIVIDE Define division of two spectra ./
-            assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
-
-            obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude ./ obj2.amplitude);
-        end
-
+    properties (Constant)
+        sc = 0.00002;
     end
 
     methods (Static)
 
-        function obj = CIE_D (T)
-            % Convert CCK to spectrum
-            % CCK = CIE D standard illuminants (D65, D50...)
-            % 8-12-2015
-            % 3/25/2022: classify
-            % 6/17/2022: merged into SpectrumClass
-            % spec = cieD2spec(6500); plot(spec);
+        function obj = getSpectrum (T)
 
             if nargin ~= 1
                 fprintf('need CCK argument\n')
@@ -108,7 +20,7 @@ classdef SpectrumClass < handle
             end
 
             % http://www.brucelindbloom.com/index.html?Eqn_DIlluminant.html
-
+            
             if 4000 <= T && T <= 7000
                 x = -4.6070e9/(T^3) + 2.9678e6/(T^2) + 0.09911e3/(T) + 0.244063;
             elseif 7000 < T && T <= 25000
@@ -142,16 +54,17 @@ classdef SpectrumClass < handle
             spec = S0 + M1 * S1 + M2 * S2;
 
             %
-            % extend to 401x1 by interpolation
+            % extend to 401x1
             %
-            spec = interp1(380:10:780,spec,380:780);
+            % interpolation
+            wl = 380:780;
+            sp = interp1(380:10:780,spec,380:780) * CIE_D.sc;
 
-            obj = SpectrumClass(380:780,spec);
+            obj = SpectrumClass(wl',sp');
 
             return
         end
-   
+
     end
 
 end
-
