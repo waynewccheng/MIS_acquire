@@ -262,7 +262,11 @@ classdef OL490Sim < handle
 
             assert(length(vec)==1024);
 
-            reflC_predicted = SpectrumClass([380:780]',obj.col_spec' * vec + obj.reflC_min.amplitude);
+            refl = obj.col_spec' * vec + obj.reflC_min.amplitude;
+            refl = min(1,refl);
+            refl = max(0,refl);
+
+            reflC_predicted = SpectrumClass([380:780]',refl);
         end
 
         function spdC_predicted = FWD_vec2spdC (obj,vec)
