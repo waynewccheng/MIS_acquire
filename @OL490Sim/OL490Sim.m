@@ -1,10 +1,12 @@
 classdef OL490Sim < handle
-    %UNTITLED Summary of this class goes here
+    %OL490SIM Characterization of OL490
     %   Detailed explanation goes here
 
     properties
         col_spec       % 1024x401 reflectance table
-        spike_filename = 'spike_0616.mat';
+        spike_filename = 'spike_HIMS1_06212022.mat';
+        gamma_filename = 'gamma_lut_HIMS1_06212022.mat';
+
         speC_max
         speC_min
 
@@ -13,6 +15,7 @@ classdef OL490Sim < handle
         classpath
         inputdatapath
         outputdatapath
+        gammadatapath
     end
 
     methods
@@ -22,32 +25,42 @@ classdef OL490Sim < handle
             %   Detailed explanation goes here
 
             obj.classpath = fileparts(which('OL490Sim'));
-            obj.inputdatapath = sprintf('%s/%s',obj.classpath,obj.spike_filename); % HIMS2
-            obj.outputdatapath = sprintf('%s/%s',obj.classpath,'col_spec_0615.mat'); % HIMS2
+            obj.inputdatapath = sprintf('%s/%s',obj.classpath,obj.spike_filename);
+            obj.outputdatapath = sprintf('%s/%s',obj.classpath,'col_spec_0621.mat');
 
-            load(obj.outputdatapath,'col_spec')
-            obj.FWD_characterize;
-            
+            obj.gammadatapath = sprintf('%s/%s',obj.classpath,obj.gamma_filename);
+
+
+            %load(obj.outputdatapath,'col_spec')
+            %obj.FWD_characterize;
+
         end
 
-        function FWD_stimulate (obj, ol, cs)
+        function FWD_stimulate_spectrally (obj, ol, cs)
             %FWD_STIMULATE Stimulate the OL490 with various vectors and measure its responses
+
+            time_spectrally = tic
 
             spike_white = {};
             spike_spike = {};
             for i = 1:50
                 % show some progress
-                fprintf('Measuring %d\n',i)
+                fprintf('Spectral measurement: %d of %d\n',i,50)
 
                 spike_white{i} = measure_white(ol,cs);
 
                 wl_range = [400+(i-1)*1:50:750];
+                wl_range_spike{i} = wl_range;
+
                 mea = measure_8_spikes(ol,cs,wl_range);
                 spike_spike{i} = mea;
             end
 
             spike_black = measure_black(ol,cs);
-            save(obj.inputdatapath,'spike_black','spike_white','spike_spike')
+
+            time_spent = toc(time_spectrally)
+
+            save(obj.inputdatapath,'spike_black','spike_white','spike_spike','wl_range_spike','time_spent')
 
             return
 
@@ -83,6 +96,14 @@ classdef OL490Sim < handle
 
         end
 
+        function FWD_stimulate_spectrally_finding (obj)
+            load(obj.inputdatapath,'spike_black','spike_white','spike_spike','time_spent')
+
+            clf
+            spike_spike{1}.plot
+
+        end
+
         function FWD_stimulate_gamma (obj, ol, cs)
             %FWD_STIMULATE_GAMMA Characterize the column gamma
 
@@ -90,6 +111,8 @@ classdef OL490Sim < handle
             % how to check pr730?
 
             VIS = 0;
+
+            time_gamma = tic
 
             % Sweep the column amplitude
             vec_max = repmat([1],1,1024);      % all columns on
@@ -99,7 +122,9 @@ classdef OL490Sim < handle
             for i = 1:length(scale)
                 vec = vec_max * scale(i);
                 ol.setColumn1024(vec)
-                i
+
+                fprintf('Gamma measurement: %d of %d\n',i,length(scale))
+
                 mea = cs.measure;
                 meascale{i} = mea;
             end
@@ -133,11 +158,37 @@ classdef OL490Sim < handle
             gamma_lut(:,1) = scale;
             gamma_lut(:,2) = meaarea;
 
-            save('gamma_lut_HIMS1_06162022.mat','gamma_lut')
+            time_spent = toc(time_gamma)
+
+            save(obj.gammadatapath,'gamma_lut','meascale','meaarea','time_spent')
 
         end
 
-        function FWD_characterize (obj)
+        function FWD_stimulate_gamma_finding (obj)
+            %FWD_STIMULATE_GAMMA_FINDING Show results
+
+            load(obj.gammadatapath,'gamma_lut','meascale','meaarea','time_spent')
+
+            clf
+
+            subplot(2,1,1)
+            hold on
+            for i=1:length(meascale)
+                meascale{i}.plot;
+            end
+            axis square
+
+            subplot(2,1,2)
+            plot(gamma_lut(:,1),gamma_lut(:,2),'o')
+            axis equal
+            axis([0 1 0 1])
+            grid on
+            xlabel('Input')
+            ylabel('Output')
+
+        end
+
+        function FWD_characterize_spectrally (obj)
             %FWD_CHARACTERIZE Analyze the collected data to construct the
             %reflectance matrix
             %
@@ -238,6 +289,10 @@ classdef OL490Sim < handle
                 col_spec(col_i,:) = spec(380:780);
             end
 
+            % clip
+            col_spec = min(1,col_spec);
+            col_spec = max(0,col_spec);
+
             %
             % visualize
             %
@@ -255,6 +310,21 @@ classdef OL490Sim < handle
             %
             save(obj.outputdatapath,'col_spec')
 
+        end
+
+        function FWD_characterize_spectrally_finding (obj)
+            col_spec = obj.col_spec;
+
+            clf
+            [X Y] = meshgrid(380:780,1:1024);
+            mesh (X,Y,col_spec)
+            axis square
+            axis([380 780 1 1024 0 0.08])
+            xlabel('Wavelength (nm)')
+            ylabel('Column #')
+            colorbar
+            view(0,90)
+            title('Reflectance')
         end
 
         function reflC_predicted = FWD_vec2reflC (obj,vec)
@@ -281,16 +351,16 @@ classdef OL490Sim < handle
         function vec = INV_spd2vec (obj,spd_target)
             %%SPD2VEC Inverse model
             % find the linear vector to generate spd
-            
+
             VIS = 0;
 
             if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
                 spd_target = spd_target';
             end
-            
+
             % need to be vertical
             assert(size(spd_target,1)==401 && size(spd_target,2)==1);
-            
+
             % visualize
             if VIS
                 clf
@@ -300,14 +370,14 @@ classdef OL490Sim < handle
                 legend('spd max','spd target')
                 title('Check the target spd')
             end
-            
+
             %
             % calcualte the reflectance
             %
             ref_target_orig = (spd_target - obj.speC_min.amplitude) ./ (obj.speC_max.amplitude - obj.speC_min.amplitude);
             ref_target = min(1,ref_target_orig);
             ref_target = max(0,ref_target);
-            
+
             % visualize
             if VIS
                 clf
@@ -316,26 +386,26 @@ classdef OL490Sim < handle
                 plot(ref_target)
                 title('Check target reflectance')
             end
-            
+
             %
             % solve the equation with R
             %
             ref_m = obj.col_spec';
             rsolve = Rsolver(ref_m,ref_target);
-            
+
             vec_orig = rsolve.A;
-            
+
             %            vec_orig = R_callRsolver1024(ref_m,ref_target);
             if VIS
                 load('vec','vec')
                 vec_orig = vec;
             end
-            
+
             % limit to [0,1]
             vec = vec_orig;
             vec = min(1,vec);
             vec = max(0,vec);
-            
+
             % visualize the vector
             if VIS
                 clf

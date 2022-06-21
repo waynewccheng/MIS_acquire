@@ -16,6 +16,8 @@ classdef DispSim < handle
     methods
 
         function show_spectra (obj)
+            %%SHOW_SPECTRA Plot the spectra of primary colors
+
             %clf
             hold on
             plot(380:1:780,obj.spec_r,'r');
@@ -25,6 +27,7 @@ classdef DispSim < handle
         end
         
         function [spec rgb_lin] = rgb2spec (obj,rgb)
+            %%RGB2SPEC Predict the output spectrum of an sRGB input
             obj.build_gamma;
             
             rgb_lin = interp1(obj.gamma_srgb(:,1),obj.gamma_srgb(:,2),rgb/255.0);
@@ -32,6 +35,8 @@ classdef DispSim < handle
         end
         
         function build_gamma (obj)
+            %%BUILD_GAMMA Build the LUT for sRGB gamma
+
             ddl = [0:255]/255;
             rgb = [ddl' ddl' ddl'];
             lab = rgb2lab(rgb);
@@ -43,6 +48,8 @@ classdef DispSim < handle
         end
         
         function rgb_lin = gamut (obj)
+            %%GAMUT Show the 2D triangle color gamuts on CIE chromaticity
+            %%diagram
             
             srgb = [0.64 0.33; 0.3 0.6 ; 0.15 0.06];
             p3 = [0.68 0.32; 0.265 0.69 ; 0.15 0.06];
@@ -76,6 +83,8 @@ classdef DispSim < handle
         end        
 
         function OL490_model (obj,ol490sim)
+            %%OL490_model Calculate the OL490 vec needed to generate the
+            %%spectra
 
             'Modeling R'
             vec_r = ol490sim.INV_spd2vec(obj.spec_r);
@@ -90,6 +99,8 @@ classdef DispSim < handle
         end
 
         function OL490_load_vec (obj)
+            %%OL490_model Load the pre-calculated OL490 vec needed to generate the
+            %%spectra
             
             vec_filename = sprintf('%s/%s',obj.classpath,'OL490_vec.mat');
             load(vec_filename,'vec_r','vec_g','vec_b')
@@ -99,6 +110,9 @@ classdef DispSim < handle
 
         end
 
+        %
+        % Matching colors for calculating metamers
+        %
         function rgb_lin = XYZ2RGB_lin (obj, XYZ_target)
             %XYZ2RGB_LIN Find the linear RGB for the display to generate
             %XYZ
