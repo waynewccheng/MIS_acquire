@@ -4,8 +4,12 @@ classdef OL490Sim < handle
 
     properties
         col_spec       % 1024x401 reflectance table
-        spike_filename = 'spike_HIMS1_06212022.mat';
-        gamma_filename = 'gamma_lut_HIMS1_06212022.mat';
+        
+        HIMS_VER = 'HIMS2_07032022';
+        
+        spike_filename % for characterization
+        gamma_filename % for characterization
+        col_spec_filename % for characterization
 
         speC_max
         speC_min
@@ -13,9 +17,10 @@ classdef OL490Sim < handle
         reflC_min
 
         classpath
-        inputdatapath
-        outputdatapath
+        spikedatapath
+        col_specdatapath
         gammadatapath
+
     end
 
     methods
@@ -24,14 +29,16 @@ classdef OL490Sim < handle
             %OL490Sim Construct an instance of this class
             %   Detailed explanation goes here
 
+            obj.spike_filename = ['spike_' obj.HIMS_VER '.mat'];
+            obj.gamma_filename = ['gamma_' obj.HIMS_VER '.mat'];
+            obj.col_spec_filename = ['col_spec_' obj.HIMS_VER '.mat'];
+        
             obj.classpath = fileparts(which('OL490Sim'));
-            obj.inputdatapath = sprintf('%s/%s',obj.classpath,obj.spike_filename);
-            obj.outputdatapath = sprintf('%s/%s',obj.classpath,'col_spec_0621.mat');
-
+            obj.spikedatapath = sprintf('%s/%s',obj.classpath,obj.spike_filename);
+            obj.col_specdatapath = sprintf('%s/%s',obj.classpath,obj.col_spec_filename);
             obj.gammadatapath = sprintf('%s/%s',obj.classpath,obj.gamma_filename);
 
-
-            %load(obj.outputdatapath,'col_spec')
+            %load(obj.col_specdatapath,'col_spec')
             %obj.FWD_characterize;
 
         end
@@ -60,7 +67,7 @@ classdef OL490Sim < handle
 
             time_spent = toc(time_spectrally)
 
-            save(obj.inputdatapath,'spike_black','spike_white','spike_spike','wl_range_spike','time_spent')
+            save(obj.spikedatapath,'spike_black','spike_white','spike_spike','wl_range_spike','time_spent')
 
             return
 
@@ -97,7 +104,7 @@ classdef OL490Sim < handle
         end
 
         function FWD_stimulate_spectrally_finding (obj)
-            load(obj.inputdatapath,'spike_black','spike_white','spike_spike','time_spent')
+            load(obj.spikedatapath,'spike_black','spike_white','spike_spike','time_spent')
 
             clf
             spike_spike{1}.plot
@@ -195,7 +202,7 @@ classdef OL490Sim < handle
 
             VIS = 0;
 
-            load(obj.inputdatapath,'spike_black','spike_white','spike_spike')
+            load(obj.spikedatapath,'spike_black','spike_white','spike_spike')
 
             %
             % Lmax
@@ -308,7 +315,7 @@ classdef OL490Sim < handle
             %
             % save the result
             %
-            save(obj.outputdatapath,'col_spec')
+            save(obj.col_specdatapath,'col_spec')
 
         end
 

@@ -9,6 +9,7 @@ classdef SpectrumClass < handle
     %   6/13/2022
     %   6/17/2022: added CIE_D -- to remove
     %   6/21/2022: to add optional info/parameters in addTime
+    %   6/28/2022: enforce vertical input as nx2
 
     %% Properties
     properties
@@ -32,6 +33,10 @@ classdef SpectrumClass < handle
                 if size(wl) ~= size(amp)
                     disp('wrong size')
                 else
+                    assert(size(wl,2)==1);
+                    assert(size(amp,2)==1);
+                    assert(size(wl,1)==size(amp,1));
+                    
                     obj.wavelength = wl;
                     obj.amplitude = amp;
                 end

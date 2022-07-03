@@ -1,11 +1,14 @@
 %% Konica Minolta CS2000A control
+% 6-28-2022 change measure to vertical nx2 
 % 3-24-2022 old code doesn't work on Win7; replaced rs232 calls 
 % 8-28-2015
 classdef cs2000Class < handle
     %%
     properties
+        ver = '6/28/2022'
         comPort
-    end
+        settings
+   end
     
     %%
     methods
@@ -28,6 +31,8 @@ classdef cs2000Class < handle
             
             obj.comPort.send('RMTS,1');
 
+            obj.settings = 'CS2000';
+            
             ret = obj.comPort.get;
         end
         
@@ -37,6 +42,9 @@ classdef cs2000Class < handle
             obj.comPort.send('RMTS,0');
             ret = obj.comPort.get;
 
+            % ? try?
+            pause(5)
+            
             % close RS232
             obj.comPort.close;
         end
@@ -213,7 +221,8 @@ classdef cs2000Class < handle
             end
             
             %% return spectrum class
-            myspec = SpectrumClass(380:780,spec);
+            % changed to vertical 6/28/2022
+            myspec = SpectrumClass([380:780]',spec');
         end
 
     end
