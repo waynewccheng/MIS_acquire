@@ -86,7 +86,7 @@ classdef OL490Class < handle
 
             if HIMS==1
                 filepath = sprintf('%s/%s.mat',obj.classpath,'gamma_lut_HIMS1_06162022')
-                filepath2 = sprintf('%s/%s.mat',obj.classpath,'vec_colormatchingfunction_HIMS1_06172022')
+                %filepath2 = sprintf('%s/%s.mat',obj.classpath,'vec_colormatchingfunction_HIMS1_06172022')
             else
                 filepath = sprintf('%s/%s.mat',obj.classpath,'gamma_lut')
             end
@@ -94,10 +94,11 @@ classdef OL490Class < handle
             load(filepath,'gamma_lut');
             obj.gamma_lut = gamma_lut;
 
-            load(filepath2,'vec_x','vec_y','vec_z','cmf_x','cmf_y','cmf_z','sc')
-            obj.vec_x = vec_x;
-            obj.vec_y = vec_y;
-            obj.vec_z = vec_z;
+            %load(filepath2,'vec_x','vec_y','vec_z','cmf_x','cmf_y','cmf_z','sc')
+%             
+%             obj.vec_x = vec_x;
+%             obj.vec_y = vec_y;
+%             obj.vec_z = vec_z;
 
             obj.HIMS = HIMS;
         end

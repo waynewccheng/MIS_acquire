@@ -2,13 +2,16 @@ classdef NECPA271Sim < DispSim
 
     methods
 
-        function obj = NECPA271Sim
+        function obj = NECPA271Sim (HIMS)
 
             obj.classpath = fileparts(which('NECPA271Sim'));
 
             % scaling factor
-            %            obj.sc = 0.07;
-            obj.sc = 1;
+            if HIMS == 1
+                obj.sc = 1;
+            else
+                obj.sc = 0.04;
+            end
 
             %            datapath = sprintf('%s/%s',obj.classpath,'necsrgb.csv');
             datapath = sprintf('%s/%s',obj.classpath,'necadobe.csv');
@@ -23,7 +26,7 @@ classdef NECPA271Sim < DispSim
             obj.spec_g = spec(2,:);
             obj.spec_b = spec(3,:);
 
-            obj.OL490_load_vec;
+            % obj.OL490_load_vec;
             
         end
 

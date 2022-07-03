@@ -11,6 +11,9 @@ classdef DispSim < handle
         vec_r
         vec_g
         vec_b
+        
+        HIMS
+        vec_file = 'OL490_vec_HIMS2.mat'
     end
     
     methods
@@ -93,7 +96,7 @@ classdef DispSim < handle
             'Modeling B'
             vec_b = ol490sim.INV_spd2vec(obj.spec_b);
 
-            vec_filename = sprintf('%s/%s',obj.classpath,'OL490_vec.mat');
+            vec_filename = sprintf('%s/%s',obj.classpath,obj.vec_file);
             save(vec_filename,'vec_r','vec_g','vec_b')
 
         end
@@ -102,7 +105,7 @@ classdef DispSim < handle
             %%OL490_model Load the pre-calculated OL490 vec needed to generate the
             %%spectra
             
-            vec_filename = sprintf('%s/%s',obj.classpath,'OL490_vec.mat');
+            vec_filename = sprintf('%s/%s',obj.classpath,obj.vec_file);
             load(vec_filename,'vec_r','vec_g','vec_b')
             obj.vec_r = vec_r;
             obj.vec_g = vec_g;

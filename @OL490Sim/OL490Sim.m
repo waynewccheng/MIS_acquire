@@ -38,7 +38,10 @@ classdef OL490Sim < handle
             obj.col_specdatapath = sprintf('%s/%s',obj.classpath,obj.col_spec_filename);
             obj.gammadatapath = sprintf('%s/%s',obj.classpath,obj.gamma_filename);
 
-            %load(obj.col_specdatapath,'col_spec')
+            if isfile(obj.col_specdatapath)
+                load(obj.col_specdatapath,'col_spec')
+            end
+            
             %obj.FWD_characterize;
 
         end
@@ -421,7 +424,13 @@ classdef OL490Sim < handle
             end
         end
 
-
+        function check_ol_cs (obj,ol,cs)
+            'Set the light to green and show its spectrum'
+            ol.setGreen;
+            mea = cs.measure;
+            mea.plot;
+        end
+        
     end
 
 end

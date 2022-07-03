@@ -11,12 +11,15 @@ classdef RiftSim < DispSim
     
     methods
         
-        function obj = RiftSim
+        function obj = RiftSim (HIMS)
             obj.classpath = fileparts(which('RiftSim'));
 
             % scaling factor
-%            obj.sc = 0.08;
-            obj.sc = 1;
+            if HIMS == 1
+                obj.sc = 1;
+            else
+                obj.sc = 0.04;
+            end
             
             datapath = sprintf('%s/%s',obj.classpath,'mydata04042022-prelens.mat');
             load(datapath,'dataspec');
@@ -67,7 +70,7 @@ classdef RiftSim < DispSim
             obj.spec_g = ramp_g(end,:) * obj.sc;
             obj.spec_b = ramp_b(end,:) * obj.sc;
             
-            obj.OL490_load_vec;
+            % obj.OL490_load_vec;
             
         end
         
