@@ -5,7 +5,7 @@ classdef OL490Sim < handle
     properties
         col_spec       % 1024x401 reflectance table
         
-        HIMS_VER = 'HIMS2_07032022';
+        HIMS_VER
         
         spike_filename % for characterization
         gamma_filename % for characterization
@@ -25,10 +25,16 @@ classdef OL490Sim < handle
 
     methods
 
-        function obj = OL490Sim
+        function obj = OL490Sim (hims)
             %OL490Sim Construct an instance of this class
             %   Detailed explanation goes here
 
+            if hims == 1
+                obj.HIMS_VER = 'HIMS1_07032022';
+            else
+                obj.HIMS_VER = 'HIMS2_07032022';
+            end
+            
             obj.spike_filename = ['spike_' obj.HIMS_VER '.mat'];
             obj.gamma_filename = ['gamma_' obj.HIMS_VER '.mat'];
             obj.col_spec_filename = ['col_spec_' obj.HIMS_VER '.mat'];

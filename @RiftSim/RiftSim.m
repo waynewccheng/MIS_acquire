@@ -16,9 +16,11 @@ classdef RiftSim < DispSim
 
             % scaling factor
             if HIMS == 1
-                obj.sc = 1;
+                obj.sc = 0.5;
+                obj.vec_file = 'OL490_vec_HIMS1.mat'                
             else
                 obj.sc = 0.04;
+                obj.vec_file = 'OL490_vec_HIMS2.mat'                
             end
             
             datapath = sprintf('%s/%s',obj.classpath,'mydata04042022-prelens.mat');

@@ -9,7 +9,7 @@ classdef rs232Class
     methods
 
         function obj = rs232Class (portname)
-            obj.S = serialport(portname,9600,'DataBits',8,'StopBits',1,'FlowControl','none','Timeout',60);
+            obj.S = serialport(portname,9600,'DataBits',8,'StopBits',1,'FlowControl','none','Timeout',600);
         end
         
         %% close the serial port
