@@ -160,7 +160,7 @@ classdef DispSim < handle
     
     methods (Static)
         
-        function show_primary_spectra
+        function poster_figure
             %% Primary Analysis of Three Displays
             %% Preparation
             
@@ -172,96 +172,120 @@ classdef DispSim < handle
             xa = 380:780;
             axisrange = [380 780 0 4e-4] ;
             lw = 2;
-            tfs = 12;
             
             clf
             t = tiledlayout(3,3,'TileSpacing','Tight')
 
             
             nexttile(1)
-            plot(xa,nec.spec_b,'b','LineWidth',lw)
+            t11 = plot(xa,nec.spec_b,'b')
+            t11.LineWidth = lw;
             axis(axisrange)
-            title('Blue','FontSize',tfs)  
-            ylabel('NEC','FontSize',tfs,'FontWeight','bold')
+            title('Blue')  
+            y11 = ylabel('NEC')
+            y11.FontWeight = 'bold';
             axis square
             
             nexttile(2)
-            plot(xa,nec.spec_g,'g','LineWidth',lw)
+            t12 = plot(xa,nec.spec_g,'g')
+            t12.LineWidth = lw;
             xticklabels({});
             yticklabels({});
             axis(axisrange)
-            title('Green','FontSize',tfs)            
+            title('Green','FontSize',12)            
             axis square
 
             nexttile(3)
-            plot(xa,nec.spec_r,'r','LineWidth',lw)
+            t13 = plot(xa,nec.spec_r,'r')
+            t13.LineWidth = lw;
             axis(axisrange)
             xticklabels({});
             yticklabels({});
-            title('Red','FontSize',tfs)            
+            title('Red')            
             axis square
 
             nexttile(4)
-            plot(xa,hp.spec_b,'b','LineWidth',lw)
+            t21 = plot(xa,hp.spec_b,'b')
+            t21.LineWidth = lw;
             axis(axisrange)
             xticklabels({});
-            ylabel('HP','FontSize',tfs,'FontWeight','bold')
+            y21 = ylabel('HP')
+            y21.FontWeight = 'bold';
             axis square
             
             nexttile(5)
-            plot(xa,hp.spec_g,'g','LineWidth',lw)
+            t22 = plot(xa,hp.spec_g,'g')
+            t22.LineWidth = lw;
             xticklabels({});
             yticklabels({});
             axis(axisrange)
             axis square
 
             nexttile(6)
-            plot(xa,hp.spec_r,'r','LineWidth',lw)
+            t23 = plot(xa,hp.spec_r,'r')
+            t23.LineWidth = lw;
             xticklabels({});
             yticklabels({});
             axis(axisrange)
             axis square
 
             nexttile(7)
-            plot(xa,rift.spec_b,'b','LineWidth',lw)
+            t31 = plot(xa,rift.spec_b,'b')
+            t31.LineWidth = lw;
             axis(axisrange)
             %xlabel('Wavelength (nm)')
-            ylabel('Oculus','FontSize',tfs,'FontWeight','bold')
+            y31 = ylabel('Oculus')
+            y31.FontWeight = 'bold';
             axis square
 
             nexttile(8)
-            plot(xa,rift.spec_g,'g','LineWidth',lw)
+            t32 = plot(xa,rift.spec_g,'g')
+            t32.LineWidth = lw;
             axis(axisrange)
             yticklabels({});
             %xlabel('Wavelength (nm)')
             axis square
 
             nexttile(9)
-            plot(xa,rift.spec_r,'r','LineWidth',lw)
+            t33 = plot(xa,rift.spec_r,'r')
+            t33.LineWidth = lw;
             axis(axisrange)
             yticklabels({});
             %xlabel('Wavelength (nm)')
             axis square
 
-            t.XLabel.String = 'Wavelength (nm)';
-            %t.YLabel.String = 'Power';
+t.XLabel.String = 'Wavelength (nm)';
+%t.YLabel.String = 'Power';
+
+return
 
             a = gcf;
-            a.Position = [1557 518 640 465];
+            a.Position = [1507 80 949 257];
+if 0            
+            
+            clf
+            subplot(1,3,1)
+            rift.show_spectra
+            title('Oculus Rift (OLED)')
+            
+            subplot(1,3,2)
+            hp.show_spectra
+            title('HP Z24X (LCD/LED)')
+            
+            subplot(1,3,3)
+            nec.show_spectra
+            title('NEC PA271 (LCD/CCFL)')
+            
+            a = gcf;
+            a.Position = [1507 80 949 257];
+end
 
+            return
+            
             saveas(gcf,'compare3spectra.png')
             
-            return
-        end
-        
-        
-        function show_primary_chromaticity
             
             % Color gamuts of the three displays to be simulated
-            
-            rift = RiftSim(2)
-            hp = HPZ24xSim(2)
-            nec = NECPA271Sim(2)
             
             srgb = [0.64 0.33; 0.3 0.6 ; 0.15 0.06];
             p3 = [0.68 0.32; 0.265 0.69 ; 0.15 0.06];
@@ -310,7 +334,7 @@ classdef DispSim < handle
             plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'o')
             
             
-            axis([0 1 0 1])
+            
             axis equal
             xlabel('CIE x')
             ylabel('CIE y')
