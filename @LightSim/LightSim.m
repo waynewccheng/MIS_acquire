@@ -240,6 +240,9 @@ classdef LightSim < handle
             % lit the light
             spd_ol490 = obj.test_vec(ol,cs,vec);
             
+            %
+            save('compare_disp_ol490_result.mat','spd_disp','spd_ol490') 
+
             %clf
             hold on
             plot(380:780,spd_disp)
