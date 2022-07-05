@@ -73,7 +73,7 @@ classdef RGB_in_xyY < handle
                 quiver3(0,0,0,0,0,1,0,'k')
             end
 
-            grid on
+            % grid on
 
             % add labels
             xlabel('CIEXYZ x')
@@ -150,7 +150,8 @@ classdef RGB_in_xyY < handle
             rgb1 = xyz2rgb(XYZ1);
 
             rgb = reshape(rgb1,size(x,1),size(x,2),3);
-            clf
+            
+            %clf
             image(flipud(rgb))
             axis equal
 
