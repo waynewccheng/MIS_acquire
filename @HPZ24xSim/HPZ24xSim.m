@@ -1,3 +1,4 @@
+%% DispSim => HP
 classdef HPZ24xSim < DispSim
 
     methods

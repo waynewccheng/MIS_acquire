@@ -1,3 +1,4 @@
+%% OL490 characterization -- including forward and inverse models
 classdef OL490Sim < handle
     %OL490SIM Characterization of OL490
     %   Detailed explanation goes here

@@ -1,3 +1,4 @@
+%% Display simulator
 classdef DispSim < handle
     
     properties

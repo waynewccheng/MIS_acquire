@@ -1,3 +1,4 @@
+%% R optim() for solving B=M*A for OL490
 classdef Rsolver < handle
     %RSOLVER Solving B = M*A
     

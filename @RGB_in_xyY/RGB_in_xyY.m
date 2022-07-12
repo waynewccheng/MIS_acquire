@@ -1,3 +1,4 @@
+%% Generate colored chromaticity diagram
 % Q: How to show the color gamut boundaries of sRGB in CIEXYZ xyY?
 % 7-4-2022
 % 12-19-2018

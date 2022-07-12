@@ -1,3 +1,4 @@
+%% DispSim => Rift
 classdef RiftSim < DispSim
     
     properties
