@@ -23,11 +23,14 @@ classdef RGB_in_xyY < handle
 
     methods
 
-        function obj = RGB_in_xyY
-
+        function obj = wg51 (obj)
+            %% for IEC WG51 tutorial
             % constants used by subroutines
             obj.interval = 0:obj.interval_step:255;
             obj.interval_rev = 255:-obj.interval_step:0;
+            obj.rgb_space = 'srgb';
+            obj.interval_step = 15;
+            obj.wall_transparency = 0.1;
 
             % 3D plot
 
@@ -35,38 +38,58 @@ classdef RGB_in_xyY < handle
 
             hold on
 
-            obj.spectral_locus
+            grid on
+
+            % add labels
+            xlabel('CIEXYZ x')
+            ylabel('CIEXYZ y')
+            zlabel('CIEXYZ Y')
+
+            % change background to gray because white background cannot show 255,255,255
+            ax = gca;
+            ax.Color = [1 1 1]*0.85;
+
+            axis([0 0.8 0 0.85])
+            % view(0,90)
+
+            view(22,14)
+
+            % turn on the rotation button
+            rotate3d on
+
+            return
+
+        end
+
+        function obj = RGB_in_xyY
+            % constants used by subroutines
+            obj.interval = 0:obj.interval_step:255;
+            obj.interval_rev = 255:-obj.interval_step:0;
+        end
+        
+        function obj = sRGB_in_xyY
+        % created another method so that the constructer does not generate figure
+
+            % 3D plot
+
+            % fg = figure('Units','inches','Position',[2 2 8 8]);
+
+            hold on
 
             if 1
-                % draw the 6 walls
-                obj.plot_wall(obj.prep_rgb_wall_rg);
-                obj.plot_wall(obj.prep_rgb_wall_gb);
-                obj.plot_wall(obj.prep_rgb_wall_rb);
-                obj.plot_wall(obj.prep_rgb_wall_r);
-                obj.plot_wall(obj.prep_rgb_wall_g);
-                obj.plot_wall(obj.prep_rgb_wall_b);
+                obj.spectral_locus
             end
 
-            if 0
-                % add primary lines
-                rgb_primary = obj.prep_rgb_primary;
-                XYZ_primary = rgb2xyz(rgb_primary/255,'ColorSpace',obj.rgb_space);
-                Yxy_primary = XYZ_primary;
-                Yxy_primary(:,1) = XYZ_primary(:,2);
-                Yxy_primary(:,2) = XYZ_primary(:,1)./sum(XYZ_primary,2);
-                Yxy_primary(:,3) = XYZ_primary(:,2)./sum(XYZ_primary,2);
-                obj.show_as_lines(Yxy_primary,rgb_primary)
+            if 1
+                obj.paint_6_walls;
             end
 
-            if 0
-                % add primary lines
-                rgb_chroma = obj.prep_rgb_chroma;
-                XYZ_chroma = rgb2xyz(rgb_chroma/255,'ColorSpace',obj.rgb_space);
-                Yxy_chroma = XYZ_chroma;
-                Yxy_chroma(:,1) = XYZ_chroma(:,2);
-                Yxy_chroma(:,2) = XYZ_chroma(:,1)./sum(XYZ_chroma,2);
-                Yxy_chroma(:,3) = XYZ_chroma(:,2)./sum(XYZ_chroma,2);
-                obj.show_as_lines(Yxy_chroma,rgb_chroma)
+            if 1
+                obj.draw_primary_lines;
+            end
+
+            if 1
+                obj.draw_chroma_lines;
             end
 
             if 0
@@ -74,7 +97,7 @@ classdef RGB_in_xyY < handle
                 quiver3(0,0,0,0,0,1,0,'k')
             end
 
-            % grid on
+            grid on
 
             % add labels
             xlabel('CIEXYZ x')
@@ -86,13 +109,107 @@ classdef RGB_in_xyY < handle
             ax.Color = [1 1 1]*0.85;
 
             axis([0 1 0 1])
-            view(0,90)
+            % view(0,90)
+
+            view(25,18)
 
             % turn on the rotation button
             rotate3d on
 
             return
 
+        end
+
+        function paint_6_walls (obj)
+            obj.plot_wall(obj.prep_rgb_wall_rg);
+            obj.plot_wall(obj.prep_rgb_wall_gb);
+            obj.plot_wall(obj.prep_rgb_wall_rb);
+            obj.plot_wall(obj.prep_rgb_wall_r);
+            obj.plot_wall(obj.prep_rgb_wall_g);
+            obj.plot_wall(obj.prep_rgb_wall_b);
+        end
+
+        function draw_grayscale (obj)
+            
+            obj.spectral_locus_color
+
+            % add primary lines
+            gray_scale = obj.prep_gray_scale;
+            XYZ_gray_scale = rgb2xyz(gray_scale/255,'ColorSpace',obj.rgb_space);
+            Yxy_gray_scale = XYZ_gray_scale;
+            Yxy_gray_scale(:,1) = XYZ_gray_scale(:,2);
+            Yxy_gray_scale(:,2) = XYZ_gray_scale(:,1)./sum(XYZ_gray_scale,2);
+            Yxy_gray_scale(:,3) = XYZ_gray_scale(:,2)./sum(XYZ_gray_scale,2);
+            obj.show_as_balls(Yxy_gray_scale,gray_scale)
+
+            % add labels
+            xlabel('CIEXYZ x')
+            ylabel('CIEXYZ y')
+            zlabel('CIEXYZ Y')
+
+            % change background to gray because white background cannot show 255,255,255
+            ax = gca;
+            ax.Color = [1 1 1]*0.85;
+
+            axis([0 0.8 0 0.85 0 1])
+            view(25,10)
+            grid on
+
+            % turn on the rotation button
+            rotate3d on
+        end
+
+        function draw_colorscale (obj)
+            
+            obj.spectral_locus_color
+
+            % add primary lines
+            rgb_primary = obj.prep_rgb_primary_only;
+            XYZ_primary = rgb2xyz(rgb_primary/255,'ColorSpace',obj.rgb_space);
+            Yxy_primary = XYZ_primary;
+            Yxy_primary(:,1) = XYZ_primary(:,2);
+            Yxy_primary(:,2) = XYZ_primary(:,1)./sum(XYZ_primary,2);
+            Yxy_primary(:,3) = XYZ_primary(:,2)./sum(XYZ_primary,2);
+            obj.show_as_balls(Yxy_primary,rgb_primary)
+
+            % add labels
+            xlabel('CIEXYZ x')
+            ylabel('CIEXYZ y')
+            zlabel('CIEXYZ Y')
+
+            % change background to gray because white background cannot show 255,255,255
+            ax = gca;
+            ax.Color = [1 1 1]*0.85;
+
+            axis([0 0.8 0 0.85 0 1])
+            view(25,10)
+            grid on
+
+            % turn on the rotation button
+            rotate3d on
+            
+        end
+
+        function draw_primary_lines (obj)
+            % add primary lines
+            rgb_primary = obj.prep_rgb_primary;
+            XYZ_primary = rgb2xyz(rgb_primary/255,'ColorSpace',obj.rgb_space);
+            Yxy_primary = XYZ_primary;
+            Yxy_primary(:,1) = XYZ_primary(:,2);
+            Yxy_primary(:,2) = XYZ_primary(:,1)./sum(XYZ_primary,2);
+            Yxy_primary(:,3) = XYZ_primary(:,2)./sum(XYZ_primary,2);
+            obj.show_as_lines(Yxy_primary,rgb_primary)
+        end
+
+        function draw_chroma_lines (obj)
+                % add primary lines
+                rgb_chroma = obj.prep_rgb_chroma;
+                XYZ_chroma = rgb2xyz(rgb_chroma/255,'ColorSpace',obj.rgb_space);
+                Yxy_chroma = XYZ_chroma;
+                Yxy_chroma(:,1) = XYZ_chroma(:,2);
+                Yxy_chroma(:,2) = XYZ_chroma(:,1)./sum(XYZ_chroma,2);
+                Yxy_chroma(:,3) = XYZ_chroma(:,2)./sum(XYZ_chroma,2);
+                obj.show_as_lines(Yxy_chroma,rgb_chroma)
         end
 
 
@@ -153,8 +270,8 @@ classdef RGB_in_xyY < handle
             rgb = reshape(rgb1,size(x,1),size(x,2),3);
             
             %clf
-            image(flipud(rgb))
-            axis equal
+%             image(flipud(rgb))
+%             axis equal
 
             return
 
@@ -556,6 +673,43 @@ classdef RGB_in_xyY < handle
 
         end
 
+        function rgb = prep_gray_scale (obj)
+
+            rgb = zeros(255/obj.interval_step,3);
+            k = 0;
+
+            if 1
+                % gray
+                for i = obj.interval
+                    k = k + 1;
+                    rgb(k,:) = [i i i];
+                end
+            end
+        end
+
+        function rgb = prep_rgb_primary_only (obj)
+            rgb = zeros(255/obj.interval_step,3);
+            k = 0;
+
+            % red
+            for i = obj.interval
+                k = k + 1;
+                rgb(k,:) = [i 0 0];
+            end
+
+            % green
+            for i = obj.interval
+                k = k + 1;
+                rgb(k,:) = [0 i 0];
+            end
+
+            % blue
+            for i = obj.interval
+                k = k + 1;
+                rgb(k,:) = [0 0 i];
+            end
+        end
+
         function rgb = prep_rgb_primary (obj)
 
             rgb = zeros(255/obj.interval_step,3);
@@ -690,13 +844,14 @@ classdef RGB_in_xyY < handle
 
 
         function show_as_balls (obj,lab,rgb)
+            hold on
             % show balls
             for k = 1:size(lab,1)
 
                 plot3(lab(k,2),lab(k,3),lab(k,1),'o',...
                     'MarkerFaceColor',rgb(k,:)/255,...
-                    'MarkerEdgeColor',rgb(k,:)/255,...
-                    'MarkerSize',15)
+                    'MarkerEdgeColor',[0 0 0],...
+                    'MarkerSize',5)
 
                 if 1
                     % add text labels
