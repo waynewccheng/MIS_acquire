@@ -67,7 +67,7 @@ classdef RGB_in_xyY < handle
             obj.interval_rev = 255:-obj.interval_step:0;
         end
         
-        function obj = sRGB_in_xyY
+        function sRGB_in_xyY (obj)
         % created another method so that the constructer does not generate figure
 
             % 3D plot
@@ -76,7 +76,7 @@ classdef RGB_in_xyY < handle
 
             hold on
 
-            if 1
+            if 0
                 obj.spectral_locus
             end
 
@@ -108,10 +108,9 @@ classdef RGB_in_xyY < handle
             ax = gca;
             ax.Color = [1 1 1]*0.85;
 
-            axis([0 1 0 1])
-            % view(0,90)
+            axis([0 0.8 0 0.85 0 1])
 
-            view(25,18)
+            view(22,14)
 
             % turn on the rotation button
             rotate3d on
