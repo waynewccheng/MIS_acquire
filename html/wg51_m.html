@@ -1,0 +1,169 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Survey of Proposed Test Methods for IEC 62563-3</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-07-15"><meta name="DC.source" content="wg51_m.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Survey of Proposed Test Methods for IEC 62563-3</h1><p>This is the commonly seen CIE chromaticity diagram, on a plane spanned by CIEXYZ <img src="wg51_m_eq16247206711595679522.png" alt="$x$"> and <img src="wg51_m_eq14521328786523663806.png" alt="$y$">, where <img src="wg51_m_eq02878922659521949672.png" alt="$0 \le x \le1$"> and <img src="wg51_m_eq17080743303701757446.png" alt="$0 \le y \le 1$">.</p><pre class="codeinput">sRGB = RGB_in_xyY;
+clf; sRGB.spectral_locus_color
+xlabel(<span class="string">'CIEXYZ x'</span>)
+ylabel(<span class="string">'CIEXYZ y'</span>)
+grid <span class="string">on</span>
+</pre><img vspace="5" hspace="5" src="wg51_m_01.png" alt=""> <p>We can add a 3rd dimension, CIEXYZ <img src="wg51_m_eq11798597659537815498.png" alt="$Y$"> (i.e., luminance), to form a three-dimensional color space (i.e., CIE xyY) to indicate any color (tristimulus).</p><pre class="codeinput">clf; sRGB.spectral_locus_color
+xlabel(<span class="string">'CIEXYZ x'</span>)
+ylabel(<span class="string">'CIEXYZ y'</span>)
+zlabel(<span class="string">'CIEXYZ Y'</span>)
+axis([0 0.8 0 0.85 0 1])
+view(25,10)
+grid <span class="string">on</span>
+rotate3d <span class="string">on</span>
+</pre><img vspace="5" hspace="5" src="wg51_m_02.png" alt=""> <p>In monochrome imaging, we usually consider a one-dimensional axis in the CIEXYZ Y direction in this CIE xyY color space. For example, this figure shows 15 measurement points from characterizing a monochrome display to check its comformity with DICOM GSDF. We needs to check its maximum value (Lmax), minimum value (Lmin), and the transition from the minimum to the maximum (gamma). Basically we examine the data points' relative locations vertically. Notice that the Lmin is seldom zero for multiple reasons. In other words, a dark monochrome display still emits light.</p><pre class="codeinput">clf
+sRGB.draw_grayscale
+drawnow
+</pre><img vspace="5" hspace="5" src="wg51_m_03.png" alt=""> <p>Sometimes we want to know the chromaticity of the monochrome (e.g., color temperature) or whether the gray shades have identicial chromaticity (i.e., gray tracking). We view the data points from the top and check their locations on the CIEXYZ x-y plane horizontally.</p><pre class="codeinput">view(0,90)
+drawnow
+</pre><img vspace="5" hspace="5" src="wg51_m_04.png" alt=""> <p>Color displays have three primary colors instead of grayscales. Therefore, we look at three vertical pillars instead of one. The three pillars have different height because luminance varies among the R, G, and B channels. Notice that the grayscales need to be generated by adding the three channels at a specific ratio (vertically).</p><pre class="codeinput">clf; sRGB.draw_colorscale
+drawnow
+</pre><img vspace="5" hspace="5" src="wg51_m_05.png" alt=""> <p>Again, we need to view the three primary colors from the top to determine their locations on the chromaticity plane (horizontally). In this figure, all 15 red shades overlap perfectly and so do the green and blue shades.</p><pre class="codeinput">view(0,90)
+drawnow
+</pre><img vspace="5" hspace="5" src="wg51_m_06.png" alt=""> <p>
+<table border=1><tr>
+<td>one</td>
+<td>two</td></tr></table>
+</p><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Survey of Proposed Test Methods for IEC 62563-3
+% This is the commonly seen CIE chromaticity diagram, on a plane spanned by 
+% CIEXYZ $x$ and $y$, where $0 \le x \le1$ and $0 \le y \le 1$.
+
+sRGB = RGB_in_xyY;
+clf; sRGB.spectral_locus_color
+xlabel('CIEXYZ x')
+ylabel('CIEXYZ y')
+grid on
+%% 
+% We can add a 3rd dimension, CIEXYZ $Y$ (i.e., luminance), to form a three-dimensional 
+% color space (i.e., CIE xyY) to indicate any color (tristimulus).
+
+clf; sRGB.spectral_locus_color
+xlabel('CIEXYZ x')
+ylabel('CIEXYZ y')
+zlabel('CIEXYZ Y')
+axis([0 0.8 0 0.85 0 1])
+view(25,10)
+grid on
+rotate3d on
+%% 
+% In monochrome imaging, we usually consider a one-dimensional axis in the CIEXYZ 
+% Y direction in this CIE xyY color space. For example, this figure shows 15 measurement 
+% points from characterizing a monochrome display to check its comformity with 
+% DICOM GSDF. We needs to check its maximum value (Lmax), minimum value (Lmin), 
+% and the transition from the minimum to the maximum (gamma). Basically we examine 
+% the data points' relative locations vertically. Notice that the Lmin is seldom 
+% zero for multiple reasons. In other words, a dark monochrome display still emits 
+% light.
+
+clf
+sRGB.draw_grayscale
+drawnow
+%% 
+% Sometimes we want to know the chromaticity of the monochrome (e.g., color 
+% temperature) or whether the gray shades have identicial chromaticity (i.e., 
+% gray tracking). We view the data points from the top and check their locations 
+% on the CIEXYZ x-y plane horizontally. 
+
+view(0,90)
+drawnow
+%% 
+% Color displays have three primary colors instead of grayscales. Therefore, 
+% we look at three vertical pillars instead of one. The three pillars have different 
+% height because luminance varies among the R, G, and B channels. Notice that 
+% the grayscales need to be generated by adding the three channels at a specific 
+% ratio (vertically).
+% 
+% 
+
+clf; sRGB.draw_colorscale
+drawnow
+%% 
+% Again, we need to view the three primary colors from the top to determine 
+% their locations on the chromaticity plane (horizontally). In this figure, all 
+% 15 red shades overlap perfectly and so do the green and blue shades.
+
+view(0,90)
+drawnow
+%%
+%
+% <html>
+% <table border=1><tr>
+% <td>one</td>
+% <td>two</td></tr></table>
+% </html>
+% 
+%% 
+%
+##### SOURCE END #####
+--></body></html>

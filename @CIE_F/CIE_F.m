@@ -1,3 +1,4 @@
+%% CIE standard illuminants F1~F12
 classdef CIE_F
     %UNTITLED5 Summary of this class goes here
     %   Detailed explanation goes here

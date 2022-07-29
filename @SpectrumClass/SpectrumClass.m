@@ -1,4 +1,4 @@
-%% SpectrumClass
+%% Spectrum class defined for exchange between spectroradiometers
 
 classdef SpectrumClass < handle
     %SPECTRUMCLASS SpectrumClas SUMMARY

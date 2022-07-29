@@ -1,3 +1,4 @@
+%% Import measurement data exported by i1Match
 classdef i1ColorCheckerClass
     
     properties
