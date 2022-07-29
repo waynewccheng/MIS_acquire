@@ -1,0 +1,42 @@
+classdef Hololens2 < DispSim
+    %HOLOLENS2 Summary of this class goes here
+    %   Detailed explanation goes here
+    
+    methods
+        
+        function obj = Hololens2 
+
+            spec_z24x = xlsread(datapath);
+            spec_z24x = spec_z24x(21:end,:)' * obj.sc;
+
+            obj.classpath = fileparts(which('Hololens2'));
+            datapath = sprintf('%s/%s',obj.classpath,'spec_07292022.mat');
+            load(datapath,'spec')
+            
+            obj.spec_r = spec_z24x(1,:);
+            obj.spec_g = spec_z24x(2,:);
+            obj.spec_b = spec_z24x(3,:);
+            
+            spec_rgb = mean(spec(6:9,21:end));
+
+            obj.spec_r = spec_rgb;
+            
+            obj.spec_g = spec_rgb;
+            obj.spec_b = spec_rgb;
+
+
+            
+            %spec_unit1 = mean(spec(1:))
+            s = spec(1:5,:);
+            s = s / max(s,2);
+            plot(s')
+        end
+        
+        function outputArg = method1(obj,inputArg)
+            %METHOD1 Summary of this method goes here
+            %   Detailed explanation goes here
+            outputArg = obj.Property1 + inputArg;
+        end
+    end
+end
+
