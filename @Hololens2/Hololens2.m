@@ -2,6 +2,10 @@ classdef Hololens2 < DispSim
     %HOLOLENS2 Summary of this class goes here
     %   Detailed explanation goes here
     
+    %
+    % dominant wavelength: 641, 521, and 453 nm
+    %
+    
     methods
         
         function obj = Hololens2 (HIMS)
