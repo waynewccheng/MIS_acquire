@@ -27,7 +27,7 @@ classdef DispSim < handle
             plot(380:1:780,obj.spec_r,'r');
             plot(380:1:780,obj.spec_g,'g');
             plot(380:1:780,obj.spec_b,'b');
-            axis([380 780 0 4e-4])
+            % axis([380 780 0 4e-4])
             legend('Red','Green','Blue')
             legend('Location','northwest')
             xlabel('Wavelengh (nm)')
@@ -161,13 +161,15 @@ classdef DispSim < handle
     
     methods (Static)
         
-        function show_primary_spectra
+        function show_primary_spectra_holo_only
             %% Primary Analysis of Three Displays
             %% Preparation
             
             rift = RiftSim(2)
             hp = HPZ24xSim(2)
             nec = NECPA271Sim(2)
+            holo = Hololens2(2)
+            
             % Spectral comparison of the red, green, and blue primary colors of the simulated displays
 
             xa = 380:780;
@@ -176,7 +178,79 @@ classdef DispSim < handle
             tfs = 12;
             
             clf
-            t = tiledlayout(3,3,'TileSpacing','Tight')
+            t = tiledlayout(2,3,'TileSpacing','Tight')
+
+            nexttile(1)
+            plot(xa,rift.spec_b,'b','LineWidth',lw)
+            axis(axisrange)
+            %xlabel('Wavelength (nm)')
+            ylabel('Oculus','FontSize',tfs,'FontWeight','bold')
+            axis square
+
+            nexttile(2)
+            plot(xa,rift.spec_g,'g','LineWidth',lw)
+            axis(axisrange)
+            yticklabels({});
+            %xlabel('Wavelength (nm)')
+            axis square
+
+            nexttile(3)
+            plot(xa,rift.spec_r,'r','LineWidth',lw)
+            axis(axisrange)
+            yticklabels({});
+            %xlabel('Wavelength (nm)')
+            axis square
+
+            nexttile(4)
+            plot(xa,holo.spec_b,'b','LineWidth',lw)
+            axis(axisrange)
+            %xlabel('Wavelength (nm)')
+            ylabel('Hololens2','FontSize',tfs,'FontWeight','bold')
+            axis square
+            
+            nexttile(5)
+            plot(xa,holo.spec_g,'g','LineWidth',lw)
+            axis(axisrange)
+            yticklabels({});
+            %xlabel('Wavelength (nm)')
+            axis square
+
+            nexttile(6)
+            plot(xa,holo.spec_r,'r','LineWidth',lw)
+            axis(axisrange)
+            yticklabels({});
+            %xlabel('Wavelength (nm)')
+            axis square
+            
+            t.XLabel.String = 'Wavelength (nm)';
+            %t.YLabel.String = 'Power';
+
+            a = gcf;
+            a.Position = [1557 518 640 465];
+
+            saveas(gcf,'compare3spectra.png')
+            
+            return
+        end
+        
+        function show_primary_spectra
+            %% Primary Analysis of Three Displays
+            %% Preparation
+            
+            rift = RiftSim(2)
+            hp = HPZ24xSim(2)
+            nec = NECPA271Sim(2)
+            holo = Hololens2(2)
+            
+            % Spectral comparison of the red, green, and blue primary colors of the simulated displays
+
+            xa = 380:780;
+            axisrange = [380 780 0 4e-4] ;
+            lw = 2;
+            tfs = 12;
+            
+            clf
+            t = tiledlayout(4,3,'TileSpacing','Tight')
 
             
             nexttile(1)
@@ -244,6 +318,27 @@ classdef DispSim < handle
             %xlabel('Wavelength (nm)')
             axis square
 
+            nexttile(10)
+            plot(xa,holo.spec_b,'b','LineWidth',lw)
+            axis(axisrange)
+            %xlabel('Wavelength (nm)')
+            ylabel('Hololens2','FontSize',tfs,'FontWeight','bold')
+            axis square
+            
+            nexttile(11)
+            plot(xa,holo.spec_g,'g','LineWidth',lw)
+            axis(axisrange)
+            yticklabels({});
+            %xlabel('Wavelength (nm)')
+            axis square
+
+            nexttile(12)
+            plot(xa,holo.spec_r,'r','LineWidth',lw)
+            axis(axisrange)
+            yticklabels({});
+            %xlabel('Wavelength (nm)')
+            axis square
+            
             t.XLabel.String = 'Wavelength (nm)';
             %t.YLabel.String = 'Power';
 
@@ -255,14 +350,12 @@ classdef DispSim < handle
             return
         end
         
-        
-        function show_primary_chromaticity
+        function show_primary_chromaticity_holo_only
             
             % Color gamuts of the three displays to be simulated
             
             rift = RiftSim(2)
-            hp = HPZ24xSim(2)
-            nec = NECPA271Sim(2)
+            holo = Hololens2(2)
             
             srgb = [0.64 0.33; 0.3 0.6 ; 0.15 0.06];
             p3 = [0.68 0.32; 0.265 0.69 ; 0.15 0.06];
@@ -276,7 +369,7 @@ classdef DispSim < handle
             plot(p3([1 2 3 1],1),p3([1 2 3 1],2),':')
             plot(rec2020([1 2 3 1],1),rec2020([1 2 3 1],2),':')
             
-            dp = rift;
+            dp = holo;
             XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
             XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
             XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
@@ -286,6 +379,69 @@ classdef DispSim < handle
             xyz_b = XYZ_b / sum(XYZ_b);
             
             plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'o')
+            
+            dp = rift;
+            XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
+            XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
+            XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
+            
+            xyz_r = XYZ_r / sum(XYZ_r);
+            xyz_g = XYZ_g / sum(XYZ_g);
+            xyz_b = XYZ_b / sum(XYZ_b);
+            
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'v')
+            
+            axis([0 1 0 1])
+            axis equal
+            xlabel('CIE x')
+            ylabel('CIE y')
+            
+            
+            legend('sRGB','DCI-P3','Rec 2020','HoloLens2','Oculus')
+        end
+    
+        function show_primary_chromaticity
+            
+            % Color gamuts of the three displays to be simulated
+            
+            rift = RiftSim(2)
+            hp = HPZ24xSim(2)
+            nec = NECPA271Sim(2)
+            holo = Hololens2(2)
+            
+            srgb = [0.64 0.33; 0.3 0.6 ; 0.15 0.06];
+            p3 = [0.68 0.32; 0.265 0.69 ; 0.15 0.06];
+            rec2020 = [0.708 0.292; 0.170 0.797 ; 0.131 0.046];
+            
+            cc = ColorConversionClass;
+            
+            clf
+            hold on
+            plot(srgb([1 2 3 1],1),srgb([1 2 3 1],2),':')
+            plot(p3([1 2 3 1],1),p3([1 2 3 1],2),':')
+            plot(rec2020([1 2 3 1],1),rec2020([1 2 3 1],2),':')
+            
+            dp = holo;
+            XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
+            XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
+            XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
+            
+            xyz_r = XYZ_r / sum(XYZ_r);
+            xyz_g = XYZ_g / sum(XYZ_g);
+            xyz_b = XYZ_b / sum(XYZ_b);
+            
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'o')
+            
+            dp = rift;
+            XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
+            XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
+            XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
+            
+            xyz_r = XYZ_r / sum(XYZ_r);
+            xyz_g = XYZ_g / sum(XYZ_g);
+            xyz_b = XYZ_b / sum(XYZ_b);
+            
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'v')
             
             
             dp = nec;
@@ -297,7 +453,7 @@ classdef DispSim < handle
             xyz_g = XYZ_g / sum(XYZ_g);
             xyz_b = XYZ_b / sum(XYZ_b);
             
-            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'o')
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'s')
             
             dp = hp;
             XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
@@ -308,7 +464,7 @@ classdef DispSim < handle
             xyz_g = XYZ_g / sum(XYZ_g);
             xyz_b = XYZ_b / sum(XYZ_b);
             
-            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'o')
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'^')
             
             
             axis([0 1 0 1])
@@ -317,7 +473,7 @@ classdef DispSim < handle
             ylabel('CIE y')
             
             
-            legend('sRGB','DCI-P3','Rec 2020','Oculus','NEC','HP')
+            legend('sRGB','DCI-P3','Rec 2020','HoloLens2','Oculus','NEC','HP')
         end
     end
 end
