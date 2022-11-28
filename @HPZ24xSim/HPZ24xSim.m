@@ -17,7 +17,7 @@ classdef HPZ24xSim < DispSim
             end
 
             datapath = sprintf('%s/%s',obj.classpath,'hpz24x_rgb.csv');
-            spec_z24x = xlsread(datapath);
+            spec_z24x = csvread(datapath);
             spec_z24x = spec_z24x(21:end,:)' * obj.sc;
 
             obj.spec_r = spec_z24x(1,:);

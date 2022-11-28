@@ -22,7 +22,7 @@ classdef NECPA271Sim < DispSim
             %
             % forgot to traspose 3x481 in Excel
             %
-            spec = xlsread(datapath)';
+            spec = csvread(datapath)';
             spec = spec(21:end,:)' * obj.sc;
 
             obj.spec_r = spec(1,:);
