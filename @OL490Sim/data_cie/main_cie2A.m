@@ -1,4 +1,4 @@
-
+%% A script for measuring all CIE illuminants
 
 load('A_d65')
 ol490.setColumn1024(A)
