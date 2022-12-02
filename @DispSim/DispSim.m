@@ -250,100 +250,125 @@ classdef DispSim < handle
             tfs = 12;
             
             clf
-            t = tiledlayout(4,3,'TileSpacing','Tight')
+            t = tiledlayout(4,3,'TileSpacing','Compact')
 
             
-            nexttile(1)
+            nt = nexttile(1);
             plot(xa,nec.spec_b,'b','LineWidth',lw)
+            xticklabels({});
+            yticklabels({});
             axis(axisrange)
             title('Blue','FontSize',tfs)  
             ylabel('NEC','FontSize',tfs,'FontWeight','bold')
-            axis square
+            PlotBeautify(nt)
+            legend off
             
-            nexttile(2)
+            nt = nexttile(2)
             plot(xa,nec.spec_g,'g','LineWidth',lw)
             xticklabels({});
             yticklabels({});
             axis(axisrange)
             title('Green','FontSize',tfs)            
-            axis square
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(3)
+            nt = nexttile(3)
             plot(xa,nec.spec_r,'r','LineWidth',lw)
+            xticklabels({});
+            yticklabels({});
             axis(axisrange)
             xticklabels({});
             yticklabels({});
             title('Red','FontSize',tfs)            
-            axis square
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(4)
+            nt = nexttile(4)
             plot(xa,hp.spec_b,'b','LineWidth',lw)
-            axis(axisrange)
             xticklabels({});
+            yticklabels({});
+            axis(axisrange)
             ylabel('HP','FontSize',tfs,'FontWeight','bold')
-            axis square
+            PlotBeautify(nt)
+            legend off
             
-            nexttile(5)
+            nt = nexttile(5)
             plot(xa,hp.spec_g,'g','LineWidth',lw)
             xticklabels({});
             yticklabels({});
             axis(axisrange)
-            axis square
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(6)
+            nt = nexttile(6)
             plot(xa,hp.spec_r,'r','LineWidth',lw)
             xticklabels({});
             yticklabels({});
             axis(axisrange)
-            axis square
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(7)
+            nt = nexttile(7)
             plot(xa,rift.spec_b,'b','LineWidth',lw)
+            xticklabels({});
+            yticklabels({});
             axis(axisrange)
             %xlabel('Wavelength (nm)')
-            ylabel('Oculus','FontSize',tfs,'FontWeight','bold')
-            axis square
+            ylabel('Rift','FontSize',tfs,'FontWeight','bold')
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(8)
+            nt = nexttile(8)
             plot(xa,rift.spec_g,'g','LineWidth',lw)
+            xticklabels({});
+            yticklabels({});
             axis(axisrange)
             yticklabels({});
             %xlabel('Wavelength (nm)')
-            axis square
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(9)
+            nt = nexttile(9)
             plot(xa,rift.spec_r,'r','LineWidth',lw)
+            xticklabels({});
+            yticklabels({});
             axis(axisrange)
             yticklabels({});
             %xlabel('Wavelength (nm)')
-            axis square
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(10)
+            nt = nexttile(10)
             plot(xa,holo.spec_b,'b','LineWidth',lw)
+            yticklabels({});            
             axis(axisrange)
             %xlabel('Wavelength (nm)')
             ylabel('Hololens2','FontSize',tfs,'FontWeight','bold')
-            axis square
+            PlotBeautify(nt)
+            legend off
             
-            nexttile(11)
+            nt = nexttile(11)
             plot(xa,holo.spec_g,'g','LineWidth',lw)
             axis(axisrange)
             yticklabels({});
-            %xlabel('Wavelength (nm)')
-            axis square
+            xlabel('Wavelength (nm)','FontSize',tfs)
+            PlotBeautify(nt)
+            legend off
 
-            nexttile(12)
+            nt = nexttile(12)
             plot(xa,holo.spec_r,'r','LineWidth',lw)
             axis(axisrange)
             yticklabels({});
             %xlabel('Wavelength (nm)')
-            axis square
+            PlotBeautify(nt)
+            legend off
             
-            t.XLabel.String = 'Wavelength (nm)';
+            %t.XLabel.String = 'Wavelength (nm)';
             %t.YLabel.String = 'Power';
 
             a = gcf;
-            a.Position = [1557 518 640 465];
+            a.Units = 'inch';
+            a.Position = [-0.2812 0.5104 12.9271 10.6354];
 
             saveas(gcf,'compare3spectra.png')
             
