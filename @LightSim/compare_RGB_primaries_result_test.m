@@ -1,0 +1,99 @@
+%% Trying to generate PSRN and SAM
+% 12/1/2022
+
+fn_mat = 'compare_RGB_primaries_result_nec';
+
+
+%%
+load(fn_mat)
+load(fn_mat)
+
+speC1 = s_predicted_b;
+speC2 = mea_b;
+
+
+clf
+
+hfig = figure;
+set(hfig, 'Units', 'inches', ...
+    'Color', [1,1,1]);
+
+s1 = speC1.amplitude;
+s2 = speC2.amplitude;
+psnr_val = psnr(s1,s2);
+sam_deg = rad2deg(sam(s1,s2));
+
+s1 = speC1.amplitude;
+s2 = speC2.amplitude;
+
+haxis = subplot(1,3,1);
+% set(haxis, ...
+%     'Units'              , 'Normalized',...
+%     'Position'           , [(no-1)/3, 0, 1/3, 1]);
+hold on
+plot(380:780,s1,'r:')
+plot(380:780,s2,'b:')
+%axis([380 780 0 5e-3])
+tstr = sprintf('%.2f, %.2f',psnr_val,sam_deg);
+title(no)
+xlabel('Wavelength (nm)')
+ylabel('SPD')
+legend('ref','mea')
+
+return
+
+
+function beautify (haxis)
+FontName = 'Arial';
+FontSize = 20;
+
+hp = get(haxis, 'Children');
+N = length(hp);
+LineWidth = 2.5*ones(1, N);
+LineStyle = {hp.LineStyle};
+Colors = reshape([hp.Color], 3, [])';
+Markers = {hp.Marker};
+hxl = get(haxis, 'XLabel');
+set(hxl              , ...
+    'FontName'       , FontName,...
+    'FontSize'       , FontSize);
+hyl = get(haxis, 'YLabel');
+set(hyl              , ...
+    'FontName'       , FontName,...
+    'FontSize'       , FontSize);
+hzl = get(haxis, 'ZLabel');
+set(hzl              , ...
+    'FontName'       , FontName,...
+    'FontSize'       , FontSize);
+
+hLegend = legend();
+set(hLegend, 'Box'       , 'off');
+
+set( haxis        , ...
+    'Units'       , 'inches',...
+    'FontName'    , FontName, ...
+    'FontSize'    , FontSize,...
+    'Box'         , 'on'     , ...
+    'Color'       , 'none',...
+    'TickDir'     , 'in'     , ...
+    'TickLength'  , [0.02, 0.02], ...
+    'XMinorTick'  , 'on', ...
+    'YMinorTick'  , 'on', ...
+    'ZMinorTick'  , 'on', ...
+    'XMinorGrid'  , 'off', ...
+    'YMinorGrid'  , 'off', ...
+    'ZMinorGrid'  , 'off', ...
+    'XColor'      , [0.0 0.0 0.0], ...
+    'YColor'      , [0.0 0.0 0.0], ...
+    'ZColor'      , [0.0 0.0 0.0], ...
+    'LineWidth'   , 1.5);
+
+for ii=1:N
+    set(hp(ii)          , ...
+        'LineStyle'       , LineStyle{ii}, ...
+        'Marker'          , Markers{ii},...
+        'Color'           , Colors(ii,:), ...
+        'LineWidth'       , LineWidth(ii));
+end
+
+end
