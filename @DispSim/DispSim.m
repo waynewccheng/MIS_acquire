@@ -539,6 +539,24 @@ classdef DispSim < handle
             
             saveas(hfig,'compare4gamut.png');
         end
+
+        function show_primary_chromaticity_add_ol490
+
+            DispSim.show_primary_chromaticity;
+
+            load('ol490_gamut.mat','data1','data2')
+            plot(data1(:,1),data1(:,2),'-.','LineWidth',1.5);
+            
+            lgn = legend;
+            %
+            % how to remove a dataset in the legend!!!
+            %
+            lgn.String(9) = [];
+            lgn.NumColumns = 2;
+
+            hfig = gcf;
+            saveas(hfig,'compare5gamut.png');
+        end
     end
 end
 
