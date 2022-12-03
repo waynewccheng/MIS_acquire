@@ -436,17 +436,19 @@ classdef DispSim < handle
 
             srgb = [0.64 0.33; 0.3 0.6 ; 0.15 0.06];
             p3 = [0.68 0.32; 0.265 0.69 ; 0.15 0.06];
+            argb = [0.64 0.33; 0.21 0.71 ; 0.15 0.06];
             rec2020 = [0.708 0.292; 0.170 0.797 ; 0.131 0.046];
 
             cc = ColorConversionClass;
 
             clf
             hold on
-            plot(srgb([1 2 3 1],1),srgb([1 2 3 1],2),':')
-            plot(p3([1 2 3 1],1),p3([1 2 3 1],2),':')
-            plot(rec2020([1 2 3 1],1),rec2020([1 2 3 1],2),':')
 
-            dp = holo;
+            %
+            % 
+            % 
+            dp = hp;
+
             XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
             XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
             XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
@@ -455,20 +457,11 @@ classdef DispSim < handle
             xyz_g = XYZ_g / sum(XYZ_g);
             xyz_b = XYZ_b / sum(XYZ_b);
 
-            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'o')
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'^')
 
-            dp = rift;
-            XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
-            XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
-            XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
-
-            xyz_r = XYZ_r / sum(XYZ_r);
-            xyz_g = XYZ_g / sum(XYZ_g);
-            xyz_b = XYZ_b / sum(XYZ_b);
-
-            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'v')
-
-
+            %
+            % 
+            % 
             dp = nec;
             XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
             XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
@@ -480,7 +473,10 @@ classdef DispSim < handle
 
             plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'s')
 
-            dp = hp;
+            %
+            % 
+            % 
+            dp = rift;
             XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
             XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
             XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
@@ -489,15 +485,41 @@ classdef DispSim < handle
             xyz_g = XYZ_g / sum(XYZ_g);
             xyz_b = XYZ_b / sum(XYZ_b);
 
-            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'^')
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'v')
+            
+            %
+            % 
+            % 
+            dp = holo;
+            XYZ_r = cc.spd2XYZ(dp.spec_r(1:10:end)');
+            XYZ_g = cc.spd2XYZ(dp.spec_g(1:10:end)');
+            XYZ_b = cc.spd2XYZ(dp.spec_b(1:10:end)');
+
+            xyz_r = XYZ_r / sum(XYZ_r);
+            xyz_g = XYZ_g / sum(XYZ_g);
+            xyz_b = XYZ_b / sum(XYZ_b);
+
+            plot([xyz_r(1) xyz_g(1) xyz_b(1) xyz_r(1)],[xyz_r(2) xyz_g(2) xyz_b(2) xyz_r(2)],'o')
 
 
+            %
+            % from small to large
+            %
+            plot(srgb([1 2 3 1],1),srgb([1 2 3 1],2),':')
+            plot(p3([1 2 3 1],1),p3([1 2 3 1],2),':')
+            plot(argb([1 2 3 1],1),argb([1 2 3 1],2),':')
+            plot(rec2020([1 2 3 1],1),rec2020([1 2 3 1],2),':')
+
+
+            %
+            %
+            %
             axis([0 1 0 1])
             axis equal
             xlabel('CIE x')
             ylabel('CIE y')
 
-            legend('sRGB','DCI-P3','Rec 2020','HoloLens2','Oculus','NEC','HP')
+            legend('HP','NEC','Rift','Hololens2','sRGB','DCI-P3','AdobeRGB','Rec.2020') % will be overridden later
 
             %
             % add spectral locus 12/3/2022
@@ -509,10 +531,11 @@ classdef DispSim < handle
             haxis = get(hfig,'CurrentAxes');
             PlotBeautify(haxis)
 
-            leg = legend;
-            leg.String = {'sRGB','DCI-P3','Rec.2020','Hololens2','Rift','NEC','HP'};
-            
-            hfig.Position = [308 556 682 536];
+            lgn = legend;
+            lgn.String = {'HP','NEC','Rift','Hololens2','sRGB','DCI-P3','AdobeRGB','Rec.2020'};
+            lgn.NumColumns = 2;
+
+            hfig.Position = [308 496 796 596];
             
             saveas(hfig,'compare4gamut.png');
         end
