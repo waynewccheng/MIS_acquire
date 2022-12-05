@@ -1,4 +1,7 @@
 %% A script for measuring all CIE illuminants
+% input: pre-calculated vectors
+% measure with PR730
+% output: spectrum
 
 load('A_d65')
 ol490.setColumn1024(A)

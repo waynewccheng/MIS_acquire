@@ -1,3 +1,4 @@
+%% show all Fxx spectra
 clf
 hold on
 
