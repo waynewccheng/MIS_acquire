@@ -1,0 +1,962 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>OL490 characterization -- including forward and inverse models</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-12-04"><meta name="DC.source" content="OL490Sim.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>OL490 characterization -- including forward and inverse models</h1><pre class="codeinput"><span class="keyword">classdef</span> OL490Sim &lt; handle
+    <span class="comment">%OL490SIM Characterization of OL490</span>
+    <span class="comment">%   Detailed explanation goes here</span>
+
+    <span class="keyword">properties</span>
+        col_spec       <span class="comment">% 1024x401 reflectance table</span>
+
+        HIMS_VER
+
+        spike_filename <span class="comment">% for characterization</span>
+        gamma_filename <span class="comment">% for characterization</span>
+        col_spec_filename <span class="comment">% for characterization</span>
+
+        speC_max
+        speC_min
+
+        reflC_min
+
+        classpath
+        spikedatapath
+        col_specdatapath
+        gammadatapath
+
+    <span class="keyword">end</span>
+
+    <span class="keyword">methods</span>
+
+        <span class="keyword">function</span> obj = OL490Sim (hims)
+            <span class="comment">%OL490Sim Construct an instance of this class</span>
+            <span class="comment">%   Detailed explanation goes here</span>
+
+            <span class="keyword">if</span> hims == 1
+                obj.HIMS_VER = <span class="string">'HIMS1_07032022'</span>;
+            <span class="keyword">else</span>
+                obj.HIMS_VER = <span class="string">'HIMS2_07032022'</span>;
+            <span class="keyword">end</span>
+
+            obj.spike_filename = [<span class="string">'spike_'</span> obj.HIMS_VER <span class="string">'.mat'</span>];
+            obj.gamma_filename = [<span class="string">'gamma_'</span> obj.HIMS_VER <span class="string">'.mat'</span>];
+            obj.col_spec_filename = [<span class="string">'col_spec_'</span> obj.HIMS_VER <span class="string">'.mat'</span>];
+
+            obj.classpath = fileparts(which(<span class="string">'OL490Sim'</span>));
+            obj.spikedatapath = sprintf(<span class="string">'%s/%s'</span>,obj.classpath,obj.spike_filename);
+            obj.col_specdatapath = sprintf(<span class="string">'%s/%s'</span>,obj.classpath,obj.col_spec_filename);
+            obj.gammadatapath = sprintf(<span class="string">'%s/%s'</span>,obj.classpath,obj.gamma_filename);
+
+            <span class="keyword">if</span> isfile(obj.col_specdatapath)
+                load(obj.col_specdatapath,<span class="string">'col_spec'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">%obj.FWD_characterize;</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> FWD_stimulate_spectrally (obj, ol, cs)
+            <span class="comment">%FWD_STIMULATE Stimulate the OL490 with various vectors and measure its responses</span>
+
+            time_spectrally = tic
+
+            spike_white = {};
+            spike_spike = {};
+            <span class="keyword">for</span> i = 1:50
+                <span class="comment">% show some progress</span>
+                fprintf(<span class="string">'Spectral measurement: %d of %d\n'</span>,i,50)
+
+                spike_white{i} = measure_white(ol,cs);
+
+                wl_range = [400+(i-1)*1:50:750];
+                wl_range_spike{i} = wl_range;
+
+                mea = measure_8_spikes(ol,cs,wl_range);
+                spike_spike{i} = mea;
+            <span class="keyword">end</span>
+
+            spike_black = measure_black(ol,cs);
+
+            time_spent = toc(time_spectrally)
+
+            save(obj.spikedatapath,<span class="string">'spike_black'</span>,<span class="string">'spike_white'</span>,<span class="string">'spike_spike'</span>,<span class="string">'wl_range_spike'</span>,<span class="string">'time_spent'</span>)
+
+            <span class="keyword">return</span>
+
+            <span class="keyword">function</span> mea = measure_white (ol,cs)
+                c_range = 1:1024;
+                vec = OL490Class.VEC_multiple_peaks(c_range);
+                ol.setColumn1024(vec)
+                mea = cs.measure;
+            <span class="keyword">end</span>
+
+            <span class="keyword">function</span> mea = measure_black (ol,cs)
+                c_range = [];
+                vec = OL490Class.VEC_multiple_peaks(c_range);
+                ol.setColumn1024(vec)
+                mea = cs.measure;
+            <span class="keyword">end</span>
+
+            <span class="keyword">function</span> mea = measure_8_spikes (ol,cs,wl_range)
+
+                col_center = [72 202 327 454 583 708 834 956];
+                wl_center = [400 450 500 550 600 650 700 750];
+
+                col_range = round(interp1(wl_center,col_center,wl_range,<span class="string">'spline'</span>,<span class="string">'extrap'</span>));
+
+                col_range = min(col_range,1024);
+                col_range = max(col_range,1);
+
+                vec = LightSim.multiple_peaks(col_range);
+                ol.setColumn1024(vec)
+                mea = cs.measure;
+
+            <span class="keyword">end</span>
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> FWD_stimulate_spectrally_finding (obj)
+            load(obj.spikedatapath,<span class="string">'spike_black'</span>,<span class="string">'spike_white'</span>,<span class="string">'spike_spike'</span>,<span class="string">'time_spent'</span>)
+
+            clf
+            spike_spike{1}.plot
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> FWD_stimulate_gamma (obj, ol, cs)
+            <span class="comment">%FWD_STIMULATE_GAMMA Characterize the column gamma</span>
+
+            assert(isa(ol,<span class="string">'OL490Class'</span>))
+            <span class="comment">% how to check pr730?</span>
+
+            VIS = 0;
+
+            time_gamma = tic
+
+            <span class="comment">% Sweep the column amplitude</span>
+            vec_max = repmat([1],1,1024);      <span class="comment">% all columns on</span>
+            scale = 0:0.1:1;                   <span class="comment">% scaling factor</span>
+
+            meascale = {};
+            <span class="keyword">for</span> i = 1:length(scale)
+                vec = vec_max * scale(i);
+                ol.setColumn1024(vec)
+
+                fprintf(<span class="string">'Gamma measurement: %d of %d\n'</span>,i,length(scale))
+
+                mea = cs.measure;
+                meascale{i} = mea;
+            <span class="keyword">end</span>
+
+            <span class="comment">% visualize</span>
+            <span class="keyword">if</span> VIS
+                clf
+                hold <span class="string">on</span>
+                <span class="keyword">for</span> i=1:length(scale)
+                    meascale{i}.plot
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">% use area under the curve to calculate the ratio</span>
+            <span class="keyword">for</span> i=1:length(scale)
+                mea_net = meascale{i} - meascale{1};
+                meaarea(i) = sum(mea_net.amplitude);
+            <span class="keyword">end</span>
+
+            <span class="comment">% normalize</span>
+            meaarea = meaarea / max(meaarea);
+
+            <span class="keyword">if</span> VIS
+                clf
+                plot(scale,meaarea,<span class="string">'o'</span>)
+                grid <span class="string">on</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">% save the data</span>
+            gamma_lut = zeros(11,2);
+            gamma_lut(:,1) = scale;
+            gamma_lut(:,2) = meaarea;
+
+            time_spent = toc(time_gamma)
+
+            save(obj.gammadatapath,<span class="string">'gamma_lut'</span>,<span class="string">'meascale'</span>,<span class="string">'meaarea'</span>,<span class="string">'time_spent'</span>)
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> FWD_stimulate_gamma_finding (obj)
+            <span class="comment">%FWD_STIMULATE_GAMMA_FINDING Show results</span>
+
+            load(obj.gammadatapath,<span class="string">'gamma_lut'</span>,<span class="string">'meascale'</span>,<span class="string">'meaarea'</span>,<span class="string">'time_spent'</span>)
+
+            clf
+
+            subplot(2,1,1)
+            hold <span class="string">on</span>
+            <span class="keyword">for</span> i=1:length(meascale)
+                meascale{i}.plot;
+            <span class="keyword">end</span>
+            axis <span class="string">square</span>
+
+            subplot(2,1,2)
+            plot(gamma_lut(:,1),gamma_lut(:,2),<span class="string">'o'</span>)
+            axis <span class="string">equal</span>
+            axis([0 1 0 1])
+            grid <span class="string">on</span>
+            xlabel(<span class="string">'Input'</span>)
+            ylabel(<span class="string">'Output'</span>)
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> FWD_characterize_spectrally (obj)
+            <span class="comment">%FWD_CHARACTERIZE Analyze the collected data to construct the</span>
+            <span class="comment">%reflectance matrix</span>
+            <span class="comment">%</span>
+
+            VIS = 0;
+
+            load(obj.spikedatapath,<span class="string">'spike_black'</span>,<span class="string">'spike_white'</span>,<span class="string">'spike_spike'</span>)
+
+            <span class="comment">%</span>
+            <span class="comment">% Lmax</span>
+            <span class="comment">%</span>
+            <span class="comment">% consider taking the average of 50</span>
+            obj.speC_max = spike_white{25};
+
+            <span class="comment">%</span>
+            <span class="comment">% Lmin</span>
+            <span class="comment">%</span>
+            obj.speC_min = spike_black;
+            obj.reflC_min = obj.speC_min ./ obj.speC_max;
+
+            <span class="keyword">if</span> VIS
+                clf
+                hold <span class="string">on</span>
+                <span class="keyword">for</span> i = 1:50
+                    spike_spike{i}.plot;
+                <span class="keyword">end</span>
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% calculate the reflectance</span>
+            <span class="comment">%</span>
+            spike_reflectance = {};
+            <span class="keyword">for</span> i = 1:50
+                spike_reflectance{i} = (spike_spike{i}-spike_black)./(spike_white{i}-spike_black);
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% visualize</span>
+            <span class="comment">%</span>
+            <span class="keyword">if</span> VIS
+                clf
+                i = 20;
+                spike_reflectance{i}.plot;
+                axis([350 800 0 0.08])
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% break the combs</span>
+            <span class="comment">%</span>
+
+            comb_array = zeros(750,780);
+
+            <span class="keyword">for</span> i = 1:50
+                <span class="comment">% decide the x values</span>
+                wl_range = [400+(i-1)*1:50:750];
+                wl_range_n = length(wl_range);
+
+                <span class="comment">% take one curve</span>
+                comb = spike_reflectance{i};
+
+                <span class="comment">% convert to real wavelength</span>
+                comb_real = zeros(1,780);
+                comb_real(1,380:780) = comb.amplitude;
+
+                <span class="comment">% iterate each spike</span>
+                <span class="keyword">for</span> j = 1:wl_range_n
+                    wl = wl_range(j);
+                    wl_width = 25;
+
+                    comb_array(wl,wl-wl_width:wl+wl_width) = comb_real(1,wl-wl_width:wl+wl_width);
+                <span class="keyword">end</span>
+
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% visualize</span>
+            <span class="comment">%</span>
+            <span class="keyword">if</span> VIS
+                clf
+                i = 691;
+                plot(comb_array(i,:))
+                axis([380 780 0 0.08])
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% link column with spectrum</span>
+            <span class="comment">%</span>
+            col_spec = zeros(1024,401);
+
+            <span class="comment">% mapping between column and wavelength from previous findings</span>
+            col_center = [72 202 327 454 583 708 834 956];
+            wl_center = [400 450 500 550 600 650 700 750];
+
+            <span class="comment">% interpolate columns between 72 and 956</span>
+            <span class="keyword">for</span> col_i = 72:956
+                wl_i = round(interp1(col_center,wl_center,col_i,<span class="string">'linear'</span>));
+                spec = comb_array(wl_i,:);
+                col_spec(col_i,:) = spec(380:780);
+            <span class="keyword">end</span>
+
+            <span class="comment">% clip</span>
+            col_spec = min(1,col_spec);
+            col_spec = max(0,col_spec);
+
+            <span class="comment">%</span>
+            <span class="comment">% visualize</span>
+            <span class="comment">%</span>
+            <span class="keyword">if</span> VIS
+                clf
+                i = 86;
+                plot(380:780,col_spec(i,:))
+                axis([380 780 0 0.08])
+            <span class="keyword">end</span>
+
+            obj.col_spec = col_spec;
+
+            <span class="comment">%</span>
+            <span class="comment">% save the result</span>
+            <span class="comment">%</span>
+            save(obj.col_specdatapath,<span class="string">'col_spec'</span>)
+
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> FWD_characterize_spectrally_finding (obj)
+            col_spec = obj.col_spec;
+
+            clf
+            [X Y] = meshgrid(380:780,1:1024);
+            mesh (X,Y,col_spec)
+            axis <span class="string">square</span>
+            axis([380 780 1 1024 0 0.08])
+            xlabel(<span class="string">'Wavelength (nm)'</span>)
+            ylabel(<span class="string">'Column #'</span>)
+            colorbar
+            view(0,90)
+            title(<span class="string">'Reflectance'</span>)
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> reflC_predicted = FWD_vec2reflC (obj,vec)
+            <span class="comment">%FWD_VEC2REFL Predict the reflectance for vec</span>
+
+            assert(length(vec)==1024);
+
+            refl = obj.col_spec' * vec + obj.reflC_min.amplitude;
+            refl = min(1,refl);
+            refl = max(0,refl);
+
+            reflC_predicted = SpectrumClass([380:780]',refl);
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> spdC_predicted = FWD_vec2spdC (obj,vec)
+            <span class="comment">%FWD_VEC2REFL Predict the output spd for vec</span>
+
+            assert(length(vec)==1024);
+
+            reflC = obj.FWD_vec2reflC(vec);
+            spdC_predicted = reflC .* obj.speC_max;
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> vec = INV_spd2vec (obj,spd_target)
+            <span class="comment">%%SPD2VEC Inverse model</span>
+            <span class="comment">% find the linear vector to generate spd</span>
+
+            VIS = 0;
+
+            <span class="keyword">if</span> ~(size(spd_target,1)==401 &amp;&amp; size(spd_target,2)==1)
+                spd_target = spd_target';
+            <span class="keyword">end</span>
+
+            <span class="comment">% need to be vertical</span>
+            assert(size(spd_target,1)==401 &amp;&amp; size(spd_target,2)==1);
+
+            <span class="comment">% visualize</span>
+            <span class="keyword">if</span> VIS
+                clf
+                hold <span class="string">on</span>
+                plot(380:780,obj.spd_max)
+                plot(380:780,spd_target)
+                legend(<span class="string">'spd max'</span>,<span class="string">'spd target'</span>)
+                title(<span class="string">'Check the target spd'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% calcualte the reflectance</span>
+            <span class="comment">%</span>
+            ref_target_orig = (spd_target - obj.speC_min.amplitude) ./ (obj.speC_max.amplitude - obj.speC_min.amplitude);
+            ref_target = min(1,ref_target_orig);
+            ref_target = max(0,ref_target);
+
+            <span class="comment">% visualize</span>
+            <span class="keyword">if</span> VIS
+                clf
+                hold <span class="string">on</span>
+                plot(ref_target_orig)
+                plot(ref_target)
+                title(<span class="string">'Check target reflectance'</span>)
+            <span class="keyword">end</span>
+
+            <span class="comment">%</span>
+            <span class="comment">% solve the equation with R</span>
+            <span class="comment">%</span>
+            ref_m = obj.col_spec';
+            rsolve = Rsolver(ref_m,ref_target);
+
+            vec_orig = rsolve.A;
+
+            <span class="comment">%            vec_orig = R_callRsolver1024(ref_m,ref_target);</span>
+            <span class="keyword">if</span> VIS
+                load(<span class="string">'vec'</span>,<span class="string">'vec'</span>)
+                vec_orig = vec;
+            <span class="keyword">end</span>
+
+            <span class="comment">% limit to [0,1]</span>
+            vec = vec_orig;
+            vec = min(1,vec);
+            vec = max(0,vec);
+
+            <span class="comment">% visualize the vector</span>
+            <span class="keyword">if</span> VIS
+                clf
+                plot(vec)
+                title(<span class="string">'Check the vector given by R'</span>)
+            <span class="keyword">end</span>
+        <span class="keyword">end</span>
+
+        <span class="keyword">function</span> check_ol_cs (obj,ol,cs)
+            <span class="string">'Set the light to green and show its spectrum'</span>
+            ol.setGreen;
+            mea = cs.measure;
+            mea.plot;
+        <span class="keyword">end</span>
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+</pre><pre class="codeoutput error">Not enough input arguments.
+
+Error in OL490Sim (line 33)
+            if hims == 1
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% OL490 characterization REPLACE_WITH_DASH_DASH including forward and inverse models
+classdef OL490Sim < handle
+    %OL490SIM Characterization of OL490
+    %   Detailed explanation goes here
+
+    properties
+        col_spec       % 1024x401 reflectance table
+        
+        HIMS_VER
+        
+        spike_filename % for characterization
+        gamma_filename % for characterization
+        col_spec_filename % for characterization
+
+        speC_max
+        speC_min
+
+        reflC_min
+
+        classpath
+        spikedatapath
+        col_specdatapath
+        gammadatapath
+
+    end
+
+    methods
+
+        function obj = OL490Sim (hims)
+            %OL490Sim Construct an instance of this class
+            %   Detailed explanation goes here
+
+            if hims == 1
+                obj.HIMS_VER = 'HIMS1_07032022';
+            else
+                obj.HIMS_VER = 'HIMS2_07032022';
+            end
+            
+            obj.spike_filename = ['spike_' obj.HIMS_VER '.mat'];
+            obj.gamma_filename = ['gamma_' obj.HIMS_VER '.mat'];
+            obj.col_spec_filename = ['col_spec_' obj.HIMS_VER '.mat'];
+        
+            obj.classpath = fileparts(which('OL490Sim'));
+            obj.spikedatapath = sprintf('%s/%s',obj.classpath,obj.spike_filename);
+            obj.col_specdatapath = sprintf('%s/%s',obj.classpath,obj.col_spec_filename);
+            obj.gammadatapath = sprintf('%s/%s',obj.classpath,obj.gamma_filename);
+
+            if isfile(obj.col_specdatapath)
+                load(obj.col_specdatapath,'col_spec')
+            end
+            
+            %obj.FWD_characterize;
+
+        end
+
+        function FWD_stimulate_spectrally (obj, ol, cs)
+            %FWD_STIMULATE Stimulate the OL490 with various vectors and measure its responses
+
+            time_spectrally = tic
+
+            spike_white = {};
+            spike_spike = {};
+            for i = 1:50
+                % show some progress
+                fprintf('Spectral measurement: %d of %d\n',i,50)
+
+                spike_white{i} = measure_white(ol,cs);
+
+                wl_range = [400+(i-1)*1:50:750];
+                wl_range_spike{i} = wl_range;
+
+                mea = measure_8_spikes(ol,cs,wl_range);
+                spike_spike{i} = mea;
+            end
+
+            spike_black = measure_black(ol,cs);
+
+            time_spent = toc(time_spectrally)
+
+            save(obj.spikedatapath,'spike_black','spike_white','spike_spike','wl_range_spike','time_spent')
+
+            return
+
+            function mea = measure_white (ol,cs)
+                c_range = 1:1024;
+                vec = OL490Class.VEC_multiple_peaks(c_range);
+                ol.setColumn1024(vec)
+                mea = cs.measure;
+            end
+
+            function mea = measure_black (ol,cs)
+                c_range = [];
+                vec = OL490Class.VEC_multiple_peaks(c_range);
+                ol.setColumn1024(vec)
+                mea = cs.measure;
+            end
+
+            function mea = measure_8_spikes (ol,cs,wl_range)
+
+                col_center = [72 202 327 454 583 708 834 956];
+                wl_center = [400 450 500 550 600 650 700 750];
+
+                col_range = round(interp1(wl_center,col_center,wl_range,'spline','extrap'));
+
+                col_range = min(col_range,1024);
+                col_range = max(col_range,1);
+
+                vec = LightSim.multiple_peaks(col_range);
+                ol.setColumn1024(vec)
+                mea = cs.measure;
+
+            end
+
+        end
+
+        function FWD_stimulate_spectrally_finding (obj)
+            load(obj.spikedatapath,'spike_black','spike_white','spike_spike','time_spent')
+
+            clf
+            spike_spike{1}.plot
+
+        end
+
+        function FWD_stimulate_gamma (obj, ol, cs)
+            %FWD_STIMULATE_GAMMA Characterize the column gamma
+
+            assert(isa(ol,'OL490Class'))
+            % how to check pr730?
+
+            VIS = 0;
+
+            time_gamma = tic
+
+            % Sweep the column amplitude
+            vec_max = repmat([1],1,1024);      % all columns on
+            scale = 0:0.1:1;                   % scaling factor
+
+            meascale = {};
+            for i = 1:length(scale)
+                vec = vec_max * scale(i);
+                ol.setColumn1024(vec)
+
+                fprintf('Gamma measurement: %d of %d\n',i,length(scale))
+
+                mea = cs.measure;
+                meascale{i} = mea;
+            end
+
+            % visualize
+            if VIS
+                clf
+                hold on
+                for i=1:length(scale)
+                    meascale{i}.plot
+                end
+            end
+
+            % use area under the curve to calculate the ratio
+            for i=1:length(scale)
+                mea_net = meascale{i} - meascale{1};
+                meaarea(i) = sum(mea_net.amplitude);
+            end
+
+            % normalize
+            meaarea = meaarea / max(meaarea);
+
+            if VIS
+                clf
+                plot(scale,meaarea,'o')
+                grid on
+            end
+
+            % save the data
+            gamma_lut = zeros(11,2);
+            gamma_lut(:,1) = scale;
+            gamma_lut(:,2) = meaarea;
+
+            time_spent = toc(time_gamma)
+
+            save(obj.gammadatapath,'gamma_lut','meascale','meaarea','time_spent')
+
+        end
+
+        function FWD_stimulate_gamma_finding (obj)
+            %FWD_STIMULATE_GAMMA_FINDING Show results
+
+            load(obj.gammadatapath,'gamma_lut','meascale','meaarea','time_spent')
+
+            clf
+
+            subplot(2,1,1)
+            hold on
+            for i=1:length(meascale)
+                meascale{i}.plot;
+            end
+            axis square
+
+            subplot(2,1,2)
+            plot(gamma_lut(:,1),gamma_lut(:,2),'o')
+            axis equal
+            axis([0 1 0 1])
+            grid on
+            xlabel('Input')
+            ylabel('Output')
+
+        end
+
+        function FWD_characterize_spectrally (obj)
+            %FWD_CHARACTERIZE Analyze the collected data to construct the
+            %reflectance matrix
+            %
+
+            VIS = 0;
+
+            load(obj.spikedatapath,'spike_black','spike_white','spike_spike')
+
+            %
+            % Lmax
+            %
+            % consider taking the average of 50
+            obj.speC_max = spike_white{25};
+
+            %
+            % Lmin
+            %
+            obj.speC_min = spike_black;
+            obj.reflC_min = obj.speC_min ./ obj.speC_max;
+
+            if VIS
+                clf
+                hold on
+                for i = 1:50
+                    spike_spike{i}.plot;
+                end
+            end
+
+            %
+            % calculate the reflectance
+            %
+            spike_reflectance = {};
+            for i = 1:50
+                spike_reflectance{i} = (spike_spike{i}-spike_black)./(spike_white{i}-spike_black);
+            end
+
+            %
+            % visualize
+            %
+            if VIS
+                clf
+                i = 20;
+                spike_reflectance{i}.plot;
+                axis([350 800 0 0.08])
+            end
+
+            %
+            % break the combs
+            %
+
+            comb_array = zeros(750,780);
+
+            for i = 1:50
+                % decide the x values
+                wl_range = [400+(i-1)*1:50:750];
+                wl_range_n = length(wl_range);
+
+                % take one curve
+                comb = spike_reflectance{i};
+
+                % convert to real wavelength
+                comb_real = zeros(1,780);
+                comb_real(1,380:780) = comb.amplitude;
+
+                % iterate each spike
+                for j = 1:wl_range_n
+                    wl = wl_range(j);
+                    wl_width = 25;
+
+                    comb_array(wl,wl-wl_width:wl+wl_width) = comb_real(1,wl-wl_width:wl+wl_width);
+                end
+
+            end
+
+            %
+            % visualize
+            %
+            if VIS
+                clf
+                i = 691;
+                plot(comb_array(i,:))
+                axis([380 780 0 0.08])
+            end
+
+            %
+            % link column with spectrum
+            %
+            col_spec = zeros(1024,401);
+
+            % mapping between column and wavelength from previous findings
+            col_center = [72 202 327 454 583 708 834 956];
+            wl_center = [400 450 500 550 600 650 700 750];
+
+            % interpolate columns between 72 and 956
+            for col_i = 72:956
+                wl_i = round(interp1(col_center,wl_center,col_i,'linear'));
+                spec = comb_array(wl_i,:);
+                col_spec(col_i,:) = spec(380:780);
+            end
+
+            % clip
+            col_spec = min(1,col_spec);
+            col_spec = max(0,col_spec);
+
+            %
+            % visualize
+            %
+            if VIS
+                clf
+                i = 86;
+                plot(380:780,col_spec(i,:))
+                axis([380 780 0 0.08])
+            end
+
+            obj.col_spec = col_spec;
+
+            %
+            % save the result
+            %
+            save(obj.col_specdatapath,'col_spec')
+
+        end
+
+        function FWD_characterize_spectrally_finding (obj)
+            col_spec = obj.col_spec;
+
+            clf
+            [X Y] = meshgrid(380:780,1:1024);
+            mesh (X,Y,col_spec)
+            axis square
+            axis([380 780 1 1024 0 0.08])
+            xlabel('Wavelength (nm)')
+            ylabel('Column #')
+            colorbar
+            view(0,90)
+            title('Reflectance')
+        end
+
+        function reflC_predicted = FWD_vec2reflC (obj,vec)
+            %FWD_VEC2REFL Predict the reflectance for vec
+
+            assert(length(vec)==1024);
+
+            refl = obj.col_spec' * vec + obj.reflC_min.amplitude;
+            refl = min(1,refl);
+            refl = max(0,refl);
+
+            reflC_predicted = SpectrumClass([380:780]',refl);
+        end
+
+        function spdC_predicted = FWD_vec2spdC (obj,vec)
+            %FWD_VEC2REFL Predict the output spd for vec
+
+            assert(length(vec)==1024);
+
+            reflC = obj.FWD_vec2reflC(vec);
+            spdC_predicted = reflC .* obj.speC_max;
+        end
+
+        function vec = INV_spd2vec (obj,spd_target)
+            %%SPD2VEC Inverse model
+            % find the linear vector to generate spd
+
+            VIS = 0;
+
+            if ~(size(spd_target,1)==401 && size(spd_target,2)==1)
+                spd_target = spd_target';
+            end
+
+            % need to be vertical
+            assert(size(spd_target,1)==401 && size(spd_target,2)==1);
+
+            % visualize
+            if VIS
+                clf
+                hold on
+                plot(380:780,obj.spd_max)
+                plot(380:780,spd_target)
+                legend('spd max','spd target')
+                title('Check the target spd')
+            end
+
+            %
+            % calcualte the reflectance
+            %
+            ref_target_orig = (spd_target - obj.speC_min.amplitude) ./ (obj.speC_max.amplitude - obj.speC_min.amplitude);
+            ref_target = min(1,ref_target_orig);
+            ref_target = max(0,ref_target);
+
+            % visualize
+            if VIS
+                clf
+                hold on
+                plot(ref_target_orig)
+                plot(ref_target)
+                title('Check target reflectance')
+            end
+
+            %
+            % solve the equation with R
+            %
+            ref_m = obj.col_spec';
+            rsolve = Rsolver(ref_m,ref_target);
+
+            vec_orig = rsolve.A;
+
+            %            vec_orig = R_callRsolver1024(ref_m,ref_target);
+            if VIS
+                load('vec','vec')
+                vec_orig = vec;
+            end
+
+            % limit to [0,1]
+            vec = vec_orig;
+            vec = min(1,vec);
+            vec = max(0,vec);
+
+            % visualize the vector
+            if VIS
+                clf
+                plot(vec)
+                title('Check the vector given by R')
+            end
+        end
+
+        function check_ol_cs (obj,ol,cs)
+            'Set the light to green and show its spectrum'
+            ol.setGreen;
+            mea = cs.measure;
+            mea.plot;
+        end
+        
+    end
+
+end
+##### SOURCE END #####
+--></body></html>

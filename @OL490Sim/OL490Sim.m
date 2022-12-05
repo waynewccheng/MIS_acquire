@@ -1,16 +1,17 @@
 %% OL490 characterization -- including forward and inverse models
+% use OL490 to simulate a given spectrum
 classdef OL490Sim < handle
     %OL490SIM Characterization of OL490
     %   Detailed explanation goes here
 
     properties
         col_spec       % 1024x401 reflectance table
-        
-        HIMS_VER
-        
-        spike_filename % for characterization
-        gamma_filename % for characterization
-        col_spec_filename % for characterization
+
+        HIMS_VER       % measurement from HIMS1/HIMS2 and date
+
+        spike_filename % data file for spectral characterization
+        gamma_filename % data file for gamma characterization
+        col_spec_filename % data file for characterization
 
         speC_max
         speC_min
@@ -19,16 +20,16 @@ classdef OL490Sim < handle
 
         classpath
         spikedatapath
-        col_specdatapath
         gammadatapath
-
+        col_specdatapath
     end
 
     methods
 
         function obj = OL490Sim (hims)
             %OL490Sim Construct an instance of this class
-            %   Detailed explanation goes here
+            %  assign the pathnames
+            %  load the data if present 
 
             if hims == 1
                 obj.HIMS_VER = 'HIMS1_07032022';
@@ -432,6 +433,7 @@ classdef OL490Sim < handle
         end
 
         function check_ol_cs (obj,ol,cs)
+            % to check whether the OL490 is working correctly
             'Set the light to green and show its spectrum'
             ol.setGreen;
             mea = cs.measure;
