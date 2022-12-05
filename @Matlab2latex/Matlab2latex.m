@@ -3,6 +3,8 @@ classdef Matlab2latex < handle
     methods (Static)
 
         function table2latex (tab)
+            % Convert a table to latex
+            % sam_table = array2table(sam_t,'VariableNames',{'R','G','B'},'RowName',{'NEC','HP','Rift'});
 
             row_name = tab.Properties.DimensionNames{1};
             var_name = tab.Properties.DimensionNames{2};
@@ -48,7 +50,7 @@ classdef Matlab2latex < handle
 
                 for c = 1:n_col
                     entry = mat(r,c);
-                    fprintf(fid,'& %.2f ',entry);
+                    fprintf(fid,'& %.4f ',entry);
                 end
                 fprintf(fid,'%s\n','\\');
             end
@@ -60,8 +62,8 @@ classdef Matlab2latex < handle
         end
 
         function mat2latex (mat)
-            %UNTITLED8 Summary of this function goes here
-            %   Detailed explanation goes here
+            % Convert a matrix to latex
+            %   
 
             n_row = size(mat,1);
             n_col = size(mat,2);
