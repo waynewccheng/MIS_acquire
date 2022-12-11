@@ -105,6 +105,7 @@ classdef SpectrumClass < handle
 
         function obj3 = rdivide (obj1, obj2)
             %%RDIVIDE Define division of two spectra ./
+            % for calculating transmittance
             assert(nnz(obj1.wavelength == obj2.wavelength)==length(obj1.wavelength));
 
             obj3 = SpectrumClass(obj1.wavelength,obj1.amplitude ./ obj2.amplitude);
