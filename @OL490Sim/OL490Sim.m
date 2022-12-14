@@ -50,7 +50,7 @@ classdef OL490Sim < handle
                 load(obj.col_specdatapath,'col_spec')
             end
             
-            %obj.FWD_characterize;
+            % obj.FWD_characterize;
 
         end
 
