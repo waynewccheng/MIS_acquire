@@ -32,7 +32,7 @@ classdef OL490Sim < handle
             %  load the data if present 
 
             if hims == 1
-                obj.HIMS_VER = 'HIMS1_07032022';
+                obj.HIMS_VER = 'HIMS1_12132022';
             else
                 obj.HIMS_VER = 'HIMS2_07032022';
             end
