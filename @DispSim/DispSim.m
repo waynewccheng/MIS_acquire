@@ -512,8 +512,9 @@ classdef DispSim < handle
             %
             % add spectral locus 12/3/2022
             %
-            ciechrome = RGB_in_xyY;
-            ciechrome.spectral_locus;
+            ciechrome = ChromaticityDiagram;
+            ciechrome.draw_spectral_locus();
+            ciechrome.draw_purple_line();
 
             hfig = gcf;
             haxis = get(hfig,'CurrentAxes');
