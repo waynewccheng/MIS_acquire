@@ -337,21 +337,21 @@ classdef RGB_in_xyY < handle
 
         end
 
-       function spectral_locus (obj)
+       function spectral_locus_2024 (obj)
 
-            cmf2 = CMF_CIE_2deg;                                           % use the CIE 2-degree CMF to get the bigger gamut
-            data401_x_y = cmf2.spectral_locus_xyz(:,2:3);                   % retrieve the spectral locus
+            cmf10 = CMF_CIE_10deg;                                           % use the CIE 10-degree CMF
+            data401_x_y = cmf10.spectral_locus_xyz(:,2:3);                   % retrieve the spectral locus
 
             % add the purple line between the first and last points of the
             % spectral locus
-            xy2 = cmf2.spectral_locus_start_wl_x_y_index(2:3);
-            xy1 = cmf2.spectral_locus_end_wl_x_y_index(2:3);
+            xy1 = cmf10.spectral_locus_start_wl_x_y_index(2:3);
+            xy2 = cmf10.spectral_locus_end_wl_x_y_index(2:3);
            
             pl_x = linspace(xy1(1),xy2(1),200)';                             % interpolation 
             pl_y = linspace(xy1(2),xy2(2),200)';
             pl_xy = [pl_x pl_y];
 
-            dataall_x_y = [data401_x_y ; pl_xy; data401_x_y(1,:)];           % concatenate
+            %data401_x_y = [data401_x_y ; pl_xy; data401_x_y(1,:)];           % concatenate
 
 
             lut_theta_rgb = obj.calc_triangle;
@@ -362,9 +362,9 @@ classdef RGB_in_xyY < handle
             %clf
             hold on
 
-            for i = 1:size(dataall_x_y,1)-1                                  % draw n-1 segments
+            for i = 1:size(data401_x_y,1)-1                                  % draw n-1 segments
 
-                xy = dataall_x_y(i,1:2);                                     % for each point
+                xy = data401_x_y(i,1:2);                                     % for each point
 
                 th = atan2(xy(2)-xyz_d65(2),xy(1)-xyz_d65(1));               % calculate the angle
                 th = th + 2*pi;
@@ -378,7 +378,8 @@ classdef RGB_in_xyY < handle
                 end
 
                 rgb = lut_theta_rgb(j,2:4);
-                plot(dataall_x_y(i:i+1,1),dataall_x_y(i:i+1,2),'-','LineWidth',2,'Color',rgb/255);
+[data401_x_y(i:i+1,1) data401_x_y(i:i+1,2)]
+                plot(data401_x_y(i:i+1,1),data401_x_y(i:i+1,2),'-','LineWidth',2,'Color',rgb/255);
                 %pause(0.1)
             end
 
@@ -387,7 +388,7 @@ classdef RGB_in_xyY < handle
 
        end
 
-        function spectral_locus_2022 (obj)
+        function spectral_locus (obj)
 
             cc = ColorConversionClass;
 
